@@ -11,7 +11,7 @@
         
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0f1115; /* Sleek dark background */
+            background-color: #0f1115;
             color: #e2e8f0;
         }
 
@@ -21,23 +21,13 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        /* Masonry Layout for zero image cropping */
+        /* Masonry Layout */
         .gallery-grid {
             column-count: 1;
             column-gap: 1.5rem;
         }
-        
-        @media (min-width: 640px) {
-            .gallery-grid {
-                column-count: 2;
-            }
-        }
-        
-        @media (min-width: 1024px) {
-            .gallery-grid {
-                column-count: 3;
-            }
-        }
+        @media (min-width: 640px) { .gallery-grid { column-count: 2; } }
+        @media (min-width: 1024px) { .gallery-grid { column-count: 3; } }
 
         .gallery-item {
             position: relative;
@@ -83,24 +73,12 @@
         }
 
         /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0f1115; 
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #334155; 
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #475569; 
-        }
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #0f1115; }
+        ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #475569; }
         
-        /* Modal Animation */
-        .modal-enter {
-            animation: fadeIn 0.2s ease-out forwards;
-        }
+        .modal-enter { animation: fadeIn 0.2s ease-out forwards; }
         @keyframes fadeIn {
             from { opacity: 0; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1); }
@@ -120,16 +98,13 @@
             animation: float 20s infinite ease-in-out alternate;
             z-index: -1;
             border-radius: 50%;
-            pointer-events: none; /* Prevents them from blocking clicks */
+            pointer-events: none;
         }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3730a3; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #1e1b4b; animation-delay: -7s; }
         .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #4c1d95; opacity: 0.2; animation-delay: -14s; }
         
-        /* Delete Button Animation */
-        .delete-art-btn {
-            z-index: 10;
-        }
+        .delete-art-btn { z-index: 10; }
         .gallery-item:hover .delete-art-btn {
             opacity: 1;
             transform: translateY(0);
@@ -138,7 +113,6 @@
 </head>
 <body class="min-h-screen flex flex-col relative overflow-x-hidden z-0">
 
-    <!-- Dynamic Background Elements -->
     <div class="bg-blob blob-1"></div>
     <div class="bg-blob blob-2"></div>
     <div class="bg-blob blob-3"></div>
@@ -147,7 +121,6 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex items-center justify-between h-16">
                 <div class="flex-shrink-0 flex items-center space-x-3">
-                    <!-- Replace this src with the URL of your custom icon -->
                     <img src="https://cdn.discordapp.com/attachments/1380106400226873345/1555159066035232828/MysteGUI_246.png?backend=b2&ex=6abf823e&is=6abe30be&hm=8e3aaf5520e878005e9d9e920451df79c6443e6d3dd601574c5c4b90c83910ca&" alt="MysteGUI Logo" class="h-8 w-8 rounded-full border border-indigo-500/50 object-cover shadow-sm">
                     <span class="font-bold text-2xl tracking-tighter text-white">
                         <span class="text-indigo-500">MYSTE</span>GUI.
@@ -160,7 +133,6 @@
                         <button data-tab="socials" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">Socials</button>
                     </div>
                 </div>
-                <!-- Mobile menu button -->
                 <div class="-mr-2 flex md:hidden">
                     <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
                         <i class="fas fa-bars text-xl"></i>
@@ -168,7 +140,6 @@
                 </div>
             </div>
         </div>
-        <!-- Mobile Menu -->
         <div class="md:hidden hidden bg-gray-900 border-b border-gray-800" id="mobile-menu">
             <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                 <button data-tab="portfolio" class="nav-tab mobile block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-800 w-full text-left">Portfolio</button>
@@ -188,7 +159,7 @@
             <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
                 <i class="fas fa-times text-xl"></i>
             </button>
-            <h3 class="text-xl font-bold mb-4 text-white">Upload New Artwork</h3>
+            <h3 class="text-xl font-bold mb-4 text-white">Add New Artwork</h3>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-400 mb-1">Title</label>
@@ -196,23 +167,38 @@
             </div>
             
             <div class="mb-4">
-                <label class="block text-sm font-medium text-gray-400 mb-1">Image File</label>
-                <div class="flex items-center justify-center w-full">
-                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-750 transition">
-                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
-                            <p class="mb-2 text-sm text-gray-400"><span class="font-semibold">Click to select</span> or drag and drop</p>
-                        </div>
-                        <input id="upload-file" type="file" class="hidden" accept="image/*" />
-                    </label>
-                </div>
-                <p id="file-name-display" class="text-xs text-indigo-400 mt-2 text-center"></p>
+                <label class="block text-sm font-medium text-gray-400 mb-1">Direct Image URL</label>
+                <input type="url" id="upload-url" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., https://cdn.discordapp.com/...">
+                <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle"></i> Paste a direct link to your image (Discord, Imgur, etc.)</p>
             </div>
 
-            <button id="submit-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors flex justify-center items-center">
-                <span>Upload to Portfolio</span>
+            <button id="submit-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors flex justify-center items-center mt-6">
+                <span>Add to Portfolio</span>
                 <i id="upload-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
             </button>
+        </div>
+    </div>
+
+    <!-- Admin Login Modal (Secret) -->
+    <div id="login-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
+        <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter relative shadow-2xl shadow-indigo-900/20">
+            <button id="close-login-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4 text-white">Artist Login</h3>
+            <p class="text-xs text-gray-400 mb-4">Log in to manage your portfolio.</p>
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
+                <input type="email" id="login-email" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <div class="mb-6">
+                <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
+                <input type="password" id="login-password" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500">
+            </div>
+            <button id="submit-login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+                Log In
+            </button>
+            <p id="login-error" class="text-red-400 text-xs mt-3 hidden"></p>
         </div>
     </div>
 
@@ -243,70 +229,50 @@
     </div>
 
     <footer class="border-t border-gray-800 mt-auto py-6 text-center text-gray-500 text-sm relative z-10">
-        <p>&copy; 2026 MysteGUI Commissions.</p>
+        <!-- Double click the copyright text to open the hidden login menu! -->
+        <p id="secret-login-trigger" class="cursor-pointer select-none hover:text-gray-400 transition-colors">&copy; 2026 MysteGUI Commissions.</p>
+        <button id="logout-btn" class="hidden mt-2 text-indigo-400 hover:text-indigo-300 underline mx-auto block">Log Out</button>
     </footer>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc, orderBy } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Firebase Configuration & Initialization
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-portfolio-app';
-        let firebaseConfig;
-        
-        try {
-            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
-                apiKey: "mock-key",
-                authDomain: "mock.firebaseapp.com",
-                projectId: "mock-project",
-                storageBucket: "mock.appspot.com",
-                messagingSenderId: "12345",
-                appId: "1:1234:web:1234"
-            };
-        } catch (e) {
-            console.error("Config parsing error, using mock", e);
-            firebaseConfig = {};
-        }
+        // ==========================================
+        // REPLACE THIS BLOCK WITH YOUR REAL CONFIG
+        // ==========================================
+        const firebaseConfig = {
+  		apiKey: "AIzaSyDMLKZgES04mUlJ1ygbPUUl1mTz5U-1wtE",
+  		authDomain: "mystegui-portfolio-ec024.firebaseapp.com",
+  		projectId: "mystegui-portfolio-ec024",
+  		storageBucket: "mystegui-portfolio-ec024.firebasestorage.app",
+  		messagingSenderId: "226274273666",
+  		appId: "1:226274273666:web:1cba5871a850830b9f479b"
+	};
+
+        // ==========================================
 
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         let currentUser = null;
-        // Determine if the current viewer is the owner based on environment tokens
-        const isAdmin = typeof __initial_auth_token !== 'undefined' && !!__initial_auth_token;
-
-        let artworksData = []; // Start completely empty, no placeholders!
+        let isAdmin = false;
+        let artworksData = []; 
 
         const state = {
             currentTab: 'portfolio',
-            calculator: {
-                currency: 'usd',
-                render: 'rendered', 
-                shot: 'bust', 
-                addons: [],
-                commercial: false
-            }
+            calculator: { currency: 'usd', render: 'rendered', shot: 'bust', addons: [], commercial: false }
         };
 
         const prices = {
             usd: {
-                render: {
-                    lineart: { bust: 15, half: 25, thigh: 35, full: 50 },
-                    greyscale: { bust: 25, half: 35, thigh: 45, full: 65 },
-                    rendered: { bust: 35, half: 50, thigh: 65, full: 90 }
-                },
+                render: { lineart: { bust: 15, half: 25, thigh: 35, full: 50 }, greyscale: { bust: 25, half: 35, thigh: 45, full: 65 }, rendered: { bust: 35, half: 50, thigh: 65, full: 90 } },
                 addons: { extra: 15, simpleBg: 10, complexBg: 20, rush: 15 }
             },
             php: {
-                render: {
-                    lineart: { bust: 50, half: 80, thigh: 100, full: 130 },
-                    greyscale: { bust: 70, half: 100, thigh: 120, full: 160 },
-                    rendered: { bust: 100, half: 150, thigh: 160, full: 200 }
-                },
+                render: { lineart: { bust: 50, half: 80, thigh: 100, full: 130 }, greyscale: { bust: 70, half: 100, thigh: 120, full: 160 }, rendered: { bust: 100, half: 150, thigh: 160, full: 200 } },
                 addons: { extra: 80, simpleBg: 50, complexBg: 100, rush: 75 }
             }
         };
@@ -316,14 +282,13 @@
         const navTabs = document.querySelectorAll('.nav-tab');
         const mobileMenuBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
-        
-        // Modal Elements
         const uploadModal = document.getElementById('upload-modal');
         const alertModal = document.getElementById('alert-modal');
         const confirmModal = document.getElementById('confirm-modal');
+        const loginModal = document.getElementById('login-modal');
         let itemToDelete = null;
 
-        // Custom Alert Function
+        // Modals & Alerts
         function showAlert(title, message, isError = false) {
             document.getElementById('alert-title').innerText = title;
             document.getElementById('alert-message').innerText = message;
@@ -338,7 +303,63 @@
             alertModal.classList.remove('flex');
         });
 
-        // Delete Confirmation Handlers
+        // Secret Login Logic
+        document.getElementById('secret-login-trigger').addEventListener('dblclick', () => {
+            if (!isAdmin) {
+                loginModal.classList.remove('hidden');
+                loginModal.classList.add('flex');
+            }
+        });
+        document.getElementById('close-login-btn').addEventListener('click', () => {
+            loginModal.classList.add('hidden');
+            loginModal.classList.remove('flex');
+        });
+        document.getElementById('submit-login-btn').addEventListener('click', async () => {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-password').value;
+            const errDisplay = document.getElementById('login-error');
+            
+            try {
+                if (firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE") {
+                    throw new Error("mock");
+                }
+                await signInWithEmailAndPassword(auth, email, pass);
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex');
+                errDisplay.classList.add('hidden');
+                showAlert("Logged In", "Welcome back, MysteGUI. You can now manage your portfolio.");
+            } catch (error) {
+                if (error.message === "mock") {
+                    showAlert("Setup Required", "You must link your Firebase Database first! See the setup guide.", true);
+                    loginModal.classList.add('hidden');
+                    loginModal.classList.remove('flex');
+                } else {
+                    errDisplay.innerText = "Invalid credentials.";
+                    errDisplay.classList.remove('hidden');
+                }
+            }
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', async () => {
+            await signOut(auth);
+            showAlert("Logged Out", "You have been logged out securely.");
+        });
+
+        // Authentication State Observer
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                currentUser = user;
+                isAdmin = true;
+                document.getElementById('logout-btn').classList.remove('hidden');
+            } else {
+                currentUser = null;
+                isAdmin = false;
+                document.getElementById('logout-btn').classList.add('hidden');
+            }
+            if(state.currentTab === 'portfolio') renderApp();
+        });
+
+        // Delete Logic
         document.getElementById('cancel-delete-btn').addEventListener('click', () => {
             confirmModal.classList.add('hidden');
             confirmModal.classList.remove('flex');
@@ -347,28 +368,20 @@
 
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
             if (!itemToDelete) return;
-            
             const btn = document.getElementById('confirm-delete-btn');
             const spinner = document.getElementById('delete-spinner');
             btn.disabled = true;
             spinner.classList.remove('hidden');
 
             try {
-                // If it's a mock or fallback ID, just delete it locally
-                if (String(itemToDelete).startsWith('mock-') || String(itemToDelete).startsWith('fallback-') || String(itemToDelete).startsWith('init-')) {
-                    artworksData = artworksData.filter(art => art.id !== itemToDelete);
+                if (firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
+                    await deleteDoc(doc(db, 'artworks', itemToDelete));
                 } else {
-                    // Try to delete from real Firebase if connected
-                    if (firebaseConfig.apiKey !== "mock-key") {
-                         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'artworks', itemToDelete));
-                    }
-                    // Remove locally to update UI instantly
-                    artworksData = artworksData.filter(art => art.id !== itemToDelete);
+                    artworksData = artworksData.filter(a => a.id !== itemToDelete);
                 }
-                
                 confirmModal.classList.add('hidden');
                 confirmModal.classList.remove('flex');
-                if (state.currentTab === 'portfolio') renderApp();
+                if(state.currentTab === 'portfolio') renderApp();
                 showAlert("Deleted", "Artwork has been removed from the gallery.");
             } catch (e) {
                 console.error("Delete error", e);
@@ -380,68 +393,40 @@
             }
         });
 
-        // Authentication Routine
-        async function authenticate() {
-            try {
-                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
-                    await signInWithCustomToken(auth, __initial_auth_token);
-                } else {
-                    await signInAnonymously(auth);
-                }
-                currentUser = auth.currentUser;
-                console.log("Authenticated as:", currentUser.uid);
-                listenToArtworks();
-            } catch (error) {
-                console.error("Auth error:", error);
-                showAlert("Authentication Error", "Could not connect to services. Viewing in offline/demo mode.", true);
-                renderApp(); // Render with placeholders
-            }
-        }
-
+        // Listen for Real Database Updates
         function listenToArtworks() {
-            if (!currentUser) return;
-            const artworksRef = collection(db, 'artifacts', appId, 'public', 'data', 'artworks');
-            const q = query(artworksRef);
+            if (firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE") {
+                return; // Do nothing in mock mode to prevent console errors
+            }
+
+            const artworksRef = collection(db, 'artworks');
+            const q = query(artworksRef, orderBy("timestamp", "desc"));
             
             onSnapshot(q, (snapshot) => {
                 const fetched = [];
                 snapshot.forEach((doc) => {
                     fetched.push({ id: doc.id, ...doc.data() });
                 });
-                
-                if (fetched.length > 0) {
-                    // Use only fetched data
-                    artworksData = [...fetched.reverse()]; 
-                }
-                
-                if (state.currentTab === 'portfolio') {
-                    renderApp();
-                }
-            }, (error) => {
-                console.error("Firestore error:", error);
-                // Keep default placeholders on error
+                artworksData = fetched;
                 if (state.currentTab === 'portfolio') renderApp();
+            }, (error) => {
+                console.error("Firestore read error.", error);
             });
         }
 
         async function handleUpload() {
-            if (!isAdmin) {
-                showAlert("Unauthorized", "Only the portfolio owner can upload artworks.", true);
+            if (!isAdmin && firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
+                showAlert("Unauthorized", "Only the owner can upload artworks.", true);
                 return;
             }
 
-            const fileInput = document.getElementById('upload-file');
             const titleInput = document.getElementById('upload-title');
-            const file = fileInput.files[0];
+            const urlInput = document.getElementById('upload-url');
             const title = titleInput.value.trim() || 'Untitled Artwork';
+            const imageUrl = urlInput.value.trim();
             
-            if (!file) {
-                showAlert("Missing File", "Please select an image file to upload.", true);
-                return;
-            }
-            // Temporarily bypass strict auth check for demo purposes if not fully connected
-            if (!currentUser && Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "mock-key") {
-                showAlert("Not Authenticated", "You must be connected to upload.", true);
+            if (!imageUrl) {
+                showAlert("Missing URL", "Please paste a direct link to your image.", true);
                 return;
             }
 
@@ -451,136 +436,81 @@
             spinner.classList.remove('hidden');
 
             try {
-                let downloadURL = "";
-                let orientation = "portrait";
-
-                // Check if we are using the mock config or real config
-                if (firebaseConfig.apiKey === "mock-key" || !firebaseConfig.apiKey) {
-                    // MOCK UPLOAD LOGIC
-                    console.log("Simulating upload (mock mode)...");
-                    await new Promise(r => setTimeout(r, 1500)); // Fake network delay
+                // Verify the URL is a real image before saving
+                const img = new Image();
+                img.onload = async () => {
+                    const orientation = img.width > img.height ? 'landscape' : 'portrait';
                     
-                    // Create a local blob URL for preview
-                    downloadURL = URL.createObjectURL(file);
-                    
-                    const img = new Image();
-                    img.onload = () => {
-                        orientation = img.width > img.height ? 'landscape' : 'portrait';
-                        
-                        // Add directly to local state
-                        const newArt = {
+                    if (firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
+                        const artworksRef = collection(db, 'artworks');
+                        await addDoc(artworksRef, {
                             title: title,
-                            url: downloadURL,
+                            url: imageUrl,
                             orientation: orientation,
-                            timestamp: Date.now(),
-                            id: "mock-" + Date.now()
-                        };
-                        
-                        artworksData.unshift(newArt);
-                        
-                        closeUploadModal();
-                        showAlert("Success!", "Artwork uploaded successfully (Demo Mode).");
+                            timestamp: Date.now()
+                        });
+                    } else {
+                        // Mock upload for local preview
+                        artworksData.unshift({ id: Date.now().toString(), title, url: imageUrl, orientation });
                         if(state.currentTab === 'portfolio') renderApp();
-                    };
-                    img.src = downloadURL;
-                    
-                } else {
-                    // REAL FIREBASE UPLOAD LOGIC
-                    try {
-                        const storageRef = ref(storage, `artifacts/${appId}/public/images/${Date.now()}_${file.name}`);
-                        const snapshot = await uploadBytes(storageRef, file);
-                        downloadURL = await getDownloadURL(snapshot.ref);
-
-                        const img = new Image();
-                        img.onload = async () => {
-                            orientation = img.width > img.height ? 'landscape' : 'portrait';
-                            
-                            const artworksRef = collection(db, 'artifacts', appId, 'public', 'data', 'artworks');
-                            await addDoc(artworksRef, {
-                                title: title,
-                                url: downloadURL,
-                                orientation: orientation,
-                                timestamp: Date.now(),
-                                uploaderId: currentUser ? currentUser.uid : 'anonymous'
-                            });
-
-                            closeUploadModal();
-                            showAlert("Success!", "Artwork uploaded successfully.");
-                        };
-                        img.src = URL.createObjectURL(file);
-                    } catch (fbError) {
-                        if (fbError.code === 'storage/unauthorized') {
-                            console.warn("Notice: Storage permission denied by security rules. Falling back to local preview upload.");
-                        } else {
-                            console.warn("Firebase upload issue:", fbError.message);
-                        }
-                        
-                        // Fallback if real Firebase throws unauthorized error (e.g. strict rules)
-                        downloadURL = URL.createObjectURL(file);
-                        const img = new Image();
-                        img.onload = () => {
-                            orientation = img.width > img.height ? 'landscape' : 'portrait';
-                            artworksData.unshift({
-                                title: title,
-                                url: downloadURL,
-                                orientation: orientation,
-                                timestamp: Date.now(),
-                                id: "fallback-" + Date.now()
-                            });
-                            closeUploadModal();
-                            showAlert("Local Success", "Artwork uploaded locally (Firebase rules blocked remote upload).");
-                            if(state.currentTab === 'portfolio') renderApp();
-                        };
-                        img.src = downloadURL;
                     }
-                }
+                    
+                    closeUploadModal();
+                    showAlert("Success!", "Artwork published to your portfolio.");
+                    btn.disabled = false;
+                    spinner.classList.add('hidden');
+                    titleInput.value = '';
+                    urlInput.value = '';
+                };
+                
+                img.onerror = () => {
+                    showAlert("Invalid Image", "Could not load the image. Make sure it is a direct image link.", true);
+                    btn.disabled = false;
+                    spinner.classList.add('hidden');
+                };
+                
+                img.src = imageUrl;
                 
             } catch (error) {
-                console.error("Upload process error:", error);
-                showAlert("Upload Failed", "An unexpected error occurred during upload.", true);
-            } finally {
+                console.error("Upload error:", error);
+                showAlert("Upload Failed", "Error saving to database.", true);
                 btn.disabled = false;
                 spinner.classList.add('hidden');
-                fileInput.value = '';
-                titleInput.value = '';
-                document.getElementById('file-name-display').innerText = '';
             }
         }
 
         function getPortfolioHTML() {
             let gridItems = '';
+            const showControls = isAdmin || firebaseConfig.apiKey === "PASTE_YOUR_API_KEY_HERE";
             
-            // Show a friendly message if the gallery is empty
             if (artworksData.length === 0) {
                 gridItems = `
                     <div class="py-16 text-center text-gray-400 w-full flex flex-col items-center justify-center">
                         <i class="fas fa-images text-6xl mb-4 opacity-40"></i>
                         <p class="text-xl font-medium text-gray-300">Your portfolio is currently empty.</p>
-                        ${isAdmin ? '<p class="text-sm mt-3 text-indigo-400 bg-indigo-900/30 px-4 py-2 rounded-lg border border-indigo-500/30">Click the "Upload Art" button above to add your first piece!</p>' : ''}
+                        ${showControls ? '<p class="text-sm mt-3 text-indigo-400 bg-indigo-900/30 px-4 py-2 rounded-lg border border-indigo-500/30">Click the "Add Art" button above to add your first piece!</p>' : ''}
                     </div>
                 `;
             } else {
                 gridItems = artworksData.map(art => `
                     <div class="gallery-item bg-gray-800 rounded-xl border border-gray-700 relative group">
-                        <img src="${art.url}" alt="${art.title}" onerror="this.src='https://placehold.co/600x800/1a1a2e/8b5cf6?text=Image+Error'" loading="lazy">
+                        <img src="${art.url}" alt="${art.title}" loading="lazy">
                         <div class="gallery-overlay">
                             <h4 class="text-white font-bold text-lg">${art.title}</h4>
                         </div>
-                        ${isAdmin ? `<button data-id="${art.id}" class="delete-art-btn absolute top-3 right-3 bg-red-600/90 hover:bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 transition-all duration-300 transform -translate-y-2 shadow-lg hover:scale-110"><i class="fas fa-trash-alt text-sm pointer-events-none"></i></button>` : ''}
+                        ${showControls ? `<button data-id="${art.id}" class="delete-art-btn absolute top-3 right-3 bg-red-600/90 hover:bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 transition-all duration-300 transform -translate-y-2 shadow-lg hover:scale-110"><i class="fas fa-trash-alt text-sm pointer-events-none"></i></button>` : ''}
                     </div>
                 `).join('');
             }
 
-            // Only generate the upload buttons if the user is the owner (isAdmin)
-            const desktopUploadBtn = isAdmin ? `
+            const desktopUploadBtn = showControls ? `
                 <button id="open-upload-btn" class="hidden md:flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-indigo-900/50">
-                    <i class="fas fa-plus"></i> <span>Upload Art</span>
+                    <i class="fas fa-plus"></i> <span>Add Art</span>
                 </button>
             ` : '';
-
-            const mobileUploadBtn = isAdmin ? `
+            const mobileUploadBtn = showControls ? `
                 <button id="open-upload-btn-mobile" class="md:hidden w-full flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg mb-8 transition-colors shadow-lg">
-                    <i class="fas fa-plus"></i> <span>Upload New Artwork</span>
+                    <i class="fas fa-plus"></i> <span>Add New Artwork</span>
                 </button>
             ` : '';
 
@@ -592,10 +522,7 @@
                     </div>
                     ${desktopUploadBtn}
                 </div>
-                
-                <!-- Mobile upload button -->
                 ${mobileUploadBtn}
-
                 <div class="${artworksData.length === 0 ? 'flex justify-center w-full' : 'gallery-grid'}">
                     ${gridItems}
                 </div>
@@ -613,11 +540,8 @@
                     <p class="text-gray-400 mb-10">Thanks for your interest! Read through everything below before reaching out. Use the calculator to estimate your price.</p>
                     
                     <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                        
-                        <!-- Info Panel -->
                         <div class="lg:col-span-7 space-y-6">
                             
-                            <!-- TOS & Rules -->
                             <div class="glass-panel rounded-xl p-6">
                                 <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-scroll text-indigo-400 mr-2"></i>Terms of Service & Rules</h3>
                                 <div class="space-y-4 text-sm text-gray-300">
@@ -633,7 +557,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Process & Turnaround -->
                             <div class="glass-panel rounded-xl p-6">
                                 <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-clock text-indigo-400 mr-2"></i>Turnaround & Process</h3>
                                 <div class="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
@@ -652,7 +575,6 @@
                                 </ol>
                             </div>
 
-                            <!-- Payment Info -->
                             <div class="glass-panel rounded-xl p-6 bg-gradient-to-br from-indigo-900/20 to-transparent">
                                 <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700/50 pb-2"><i class="fas fa-wallet text-indigo-400 mr-2"></i>Payment Options</h3>
                                 <div class="flex flex-wrap gap-4 mb-4">
@@ -669,22 +591,18 @@
                             </div>
                         </div>
 
-                        <!-- Calculator Panel -->
                         <div class="lg:col-span-5 glass-panel rounded-xl p-6 relative overflow-hidden h-fit lg:sticky lg:top-24">
                             <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-600 rounded-full blur-3xl opacity-10 -mr-10 -mt-10"></div>
-                            
                             <div class="flex justify-between items-center mb-6">
                                 <h2 class="text-2xl font-bold text-white flex items-center">
                                     <i class="fas fa-calculator text-indigo-500 mr-3"></i> Calculator
                                 </h2>
-                                <!-- Currency Toggle -->
                                 <div class="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
                                     <button class="curr-toggle px-3 py-1 text-sm rounded-md font-medium transition-colors ${curr === 'usd' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="usd">USD $</button>
                                     <button class="curr-toggle px-3 py-1 text-sm rounded-md font-medium transition-colors ${curr === 'php' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="php">PHP ₱</button>
                                 </div>
                             </div>
                             
-                            <!-- Render Type -->
                             <div class="mb-5">
                                 <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">1. Render Type</label>
                                 <div class="grid grid-cols-3 gap-2">
@@ -694,7 +612,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Shot Type -->
                             <div class="mb-5">
                                 <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">2. Shot Type</label>
                                 <div class="grid grid-cols-2 gap-2">
@@ -705,7 +622,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Add-ons -->
                             <div class="mb-6">
                                 <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">3. Add-ons & Usage</label>
                                 <div class="space-y-2">
@@ -728,7 +644,6 @@
                                 </div>
                             </div>
                             
-                            <!-- Total -->
                             <div class="border-t border-gray-700 pt-5 mt-2 flex justify-between items-center bg-gray-900/50 -mx-6 -mb-6 p-6 rounded-b-xl">
                                 <div>
                                     <span class="block text-gray-400 font-medium">Estimated Total</span>
@@ -758,7 +673,6 @@
                 <div class="max-w-4xl mx-auto text-center py-8">
                     <h1 class="text-4xl font-extrabold text-white mb-4">Connect With Me</h1>
                     <p class="text-gray-400 mb-10">Follow me on social media, join the Discord, or reach out via email for business inquiries!</p>
-                    
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         ${socials.map(s => `
                             <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="glass-panel border border-transparent p-5 rounded-xl flex items-center space-x-4 text-gray-300 transition-all duration-300 hover:text-white ${s.color} hover:shadow-lg transform hover:-translate-y-1 group">
@@ -807,77 +721,52 @@
 
         function calculateTotal() {
             const curr = state.calculator.currency;
-            const render = state.calculator.render;
-            const shot = state.calculator.shot;
-            
-            // Base price calculation via lookup table
-            let basePrice = prices[curr].render[render][shot];
-            
-            // Commercial multiplier
-            if (state.calculator.commercial) {
-                basePrice *= 2;
-            }
-            
-            // Addons calculation
+            let basePrice = prices[curr].render[state.calculator.render][state.calculator.shot];
+            if (state.calculator.commercial) basePrice *= 2;
             let addonTotal = 0;
-            state.calculator.addons.forEach(addonId => {
-                addonTotal += prices[curr].addons[addonId];
-            });
-            
-            const total = basePrice + addonTotal;
-            const sym = curr === 'usd' ? '$' : '₱';
+            state.calculator.addons.forEach(addonId => { addonTotal += prices[curr].addons[addonId]; });
             
             const totalEl = document.getElementById('calc-total');
             if (totalEl) {
-                totalEl.innerText = `${sym}${total}`;
-                // Animate value change
+                totalEl.innerText = `${curr === 'usd' ? '$' : '₱'}${basePrice + addonTotal}`;
                 totalEl.style.transform = 'scale(1.1)';
                 setTimeout(() => totalEl.style.transform = 'scale(1)', 150);
             }
         }
 
         function bindCalculatorEvents() {
-            // Currency Toggles
             document.querySelectorAll('.curr-toggle').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     state.calculator.currency = e.target.dataset.curr;
-                    renderApp(); // Re-render to update UI texts and symbols
+                    renderApp();
                 });
             });
-
-            // Radios and Checkboxes
             document.querySelectorAll('.calc-input').forEach(input => {
                 input.addEventListener('change', (e) => {
                     if (e.target.name === 'render') state.calculator.render = e.target.value;
                     if (e.target.name === 'shot') state.calculator.shot = e.target.value;
                     if (e.target.name === 'addon') {
-                        const val = e.target.value;
-                        if (e.target.checked) {
-                            if (!state.calculator.addons.includes(val)) state.calculator.addons.push(val);
-                        } else {
-                            state.calculator.addons = state.calculator.addons.filter(a => a !== val);
+                        if (e.target.checked && !state.calculator.addons.includes(e.target.value)) {
+                            state.calculator.addons.push(e.target.value);
+                        } else if (!e.target.checked) {
+                            state.calculator.addons = state.calculator.addons.filter(a => a !== e.target.value);
                         }
                     }
                     calculateTotal();
                 });
             });
-            
-            // Commercial toggle
             const commToggle = document.getElementById('calc-commercial');
-            if(commToggle) {
-                commToggle.addEventListener('change', (e) => {
-                    state.calculator.commercial = e.target.checked;
-                    calculateTotal();
-                });
-            }
-            
-            calculateTotal(); // initial calc
+            if(commToggle) commToggle.addEventListener('change', (e) => {
+                state.calculator.commercial = e.target.checked;
+                calculateTotal();
+            });
+            calculateTotal();
         }
 
         function bindPortfolioEvents() {
             document.querySelectorAll('.delete-art-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
-                    e.stopPropagation(); // Prevents clicking the image behind it
+                    e.stopPropagation();
                     itemToDelete = e.currentTarget.dataset.id;
                     confirmModal.classList.remove('hidden');
                     confirmModal.classList.add('flex');
@@ -886,7 +775,6 @@
         }
 
         function renderApp() {
-            // Update active tab styling
             navTabs.forEach(tab => {
                 if (tab.dataset.tab === state.currentTab) {
                     tab.classList.remove('text-gray-300', 'hover:bg-gray-700');
@@ -897,19 +785,13 @@
                 }
             });
 
-            // Render Content
             if (state.currentTab === 'portfolio') {
                 mainContent.innerHTML = getPortfolioHTML();
-                
-                // Bind Upload Buttons
                 const btn1 = document.getElementById('open-upload-btn');
                 const btn2 = document.getElementById('open-upload-btn-mobile');
                 if (btn1) btn1.addEventListener('click', openUploadModal);
                 if (btn2) btn2.addEventListener('click', openUploadModal);
-                
-                // Bind Delete Buttons
                 bindPortfolioEvents();
-
             } else if (state.currentTab === 'commissions') {
                 mainContent.innerHTML = getCommissionsHTML();
                 bindCalculatorEvents();
@@ -918,21 +800,15 @@
             }
         }
 
-        // Tab Navigation
         navTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
                 state.currentTab = e.target.dataset.tab;
                 renderApp();
-                mobileMenu.classList.add('hidden'); // Close mobile menu if open
+                mobileMenu.classList.add('hidden');
             });
         });
+        mobileMenuBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
 
-        // Mobile Menu Toggle
-        mobileMenuBtn.addEventListener('click', () => {
-            mobileMenu.classList.toggle('hidden');
-        });
-
-        // Modal Logic
         function openUploadModal() {
             uploadModal.classList.remove('hidden');
             uploadModal.classList.add('flex');
@@ -941,19 +817,11 @@
             uploadModal.classList.add('hidden');
             uploadModal.classList.remove('flex');
         }
-        
         document.getElementById('close-modal-btn').addEventListener('click', closeUploadModal);
         document.getElementById('submit-upload-btn').addEventListener('click', handleUpload);
-        
-        // File input display name logic
-        document.getElementById('upload-file').addEventListener('change', (e) => {
-            const fileName = e.target.files[0] ? e.target.files[0].name : '';
-            document.getElementById('file-name-display').innerText = fileName;
-        });
 
-        // Init App
         renderApp();
-        authenticate();
+        listenToArtworks();
 
     </script>
 </body>
