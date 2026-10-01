@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MysteGUI | Art Portfolio & Commissions</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0f1115; /* Sleek dark background */
+            color: #e2e8f0;
+        }
+
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Masonry Layout for zero image cropping */
+        .gallery-grid {
+            column-count: 1;
+            column-gap: 1.5rem;
+        }
+        
+        @media (min-width: 640px) {
+            .gallery-grid {
+                column-count: 2;
+            }
+        }
+        
+        @media (min-width: 1024px) {
+            .gallery-grid {
+                column-count: 3;
+            }
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            break-inside: avoid;
+            margin-bottom: 1.5rem;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: transform 0.5s ease;
+        }
+
+        .gallery-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .gallery-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+            padding: 1.5rem 1rem 1rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .gallery-item:hover .gallery-overlay {
+            transform: translateY(0);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0f1115; 
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #334155; 
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #475569; 
+        }
+        
+        /* Modal Animation */
+        .modal-enter {
+            animation: fadeIn 0.2s ease-out forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        
+        /* Dynamic Ambient Background */
+        @keyframes float {
+            0% { transform: translate(0px, 0px) scale(1); }
+            33% { transform: translate(30px, -50px) scale(1.1); }
+            66% { transform: translate(-20px, 20px) scale(0.9); }
+            100% { transform: translate(0px, 0px) scale(1); }
+        }
+        .bg-blob {
+            position: fixed;
+            filter: blur(90px);
+            opacity: 0.4;
+            animation: float 20s infinite ease-in-out alternate;
+            z-index: -1;
+            border-radius: 50%;
+            pointer-events: none; /* Prevents them from blocking clicks */
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3730a3; }
+        .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #1e1b4b; animation-delay: -7s; }
+        .blob-3 { top: 40%; left: 40%; width: 40vw; height: 40vw; background: #4c1d95; opacity: 0.2; animation-delay: -14s; }
+        
+        /* Delete Button Animation */
+        .delete-art-btn {
+            z-index: 10;
+        }
+        .gallery-item:hover .delete-art-btn {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col relative overflow-x-hidden z-0">
+
+    <!-- Dynamic Background Elements -->
+    <div class="bg-blob blob-1"></div>
+    <div class="bg-blob blob-2"></div>
+    <div class="bg-blob blob-3"></div>
+
+    <nav class="sticky top-0 z-40 glass-panel border-b border-gray-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <div class="flex-shrink-0 flex items-center space-x-3">
+                    <!-- Replace this src with the URL of your custom icon -->
+                    <img src="https://cdn.discordapp.com/attachments/1380106400226873345/1555159066035232828/MysteGUI_246.png?backend=b2&ex=6abf823e&is=6abe30be&hm=8e3aaf5520e878005e9d9e920451df79c6443e6d3dd601574c5c4b90c83910ca&" alt="MysteGUI Logo" class="h-8 w-8 rounded-full border border-indigo-500/50 object-cover shadow-sm">
+                    <span class="font-bold text-2xl tracking-tighter text-white">
+                        <span class="text-indigo-500">MYSTE</span>GUI.
+                    </span>
+                </div>
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-8">
+                        <button data-tab="portfolio" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-white bg-gray-800 transition-colors">Portfolio</button>
+                        <button data-tab="commissions" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">Commissions</button>
+                        <button data-tab="socials" class="nav-tab px-3 py-2 rounded-md text-sm font-medium text-gray-300 hover:text-white hover:bg-gray-700 transition-colors">Socials</button>
+                    </div>
+                </div>
+                <!-- Mobile menu button -->
+                <div class="-mr-2 flex md:hidden">
+                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div class="md:hidden hidden bg-gray-900 border-b border-gray-800" id="mobile-menu">
+            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
+                <button data-tab="portfolio" class="nav-tab mobile block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-800 w-full text-left">Portfolio</button>
+                <button data-tab="commissions" class="nav-tab mobile block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 w-full text-left">Commissions</button>
+                <button data-tab="socials" class="nav-tab mobile block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 w-full text-left">Socials</button>
+            </div>
+        </div>
+    </nav>
+
+    <main id="main-content" class="flex-grow w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <!-- Content gets injected here -->
+    </main>
+
+    <!-- Upload Modal -->
+    <div id="upload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
+        <div class="glass-panel w-full max-w-md rounded-xl p-6 modal-enter relative shadow-2xl shadow-indigo-900/20">
+            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+            <h3 class="text-xl font-bold mb-4 text-white">Upload New Artwork</h3>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-400 mb-1">Title</label>
+                <input type="text" id="upload-title" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Cyberpunk Samurai">
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-400 mb-1">Image File</label>
+                <div class="flex items-center justify-center w-full">
+                    <label class="flex flex-col items-center justify-center w-full h-32 border-2 border-gray-700 border-dashed rounded-lg cursor-pointer bg-gray-800 hover:bg-gray-750 transition">
+                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-gray-400 mb-2"></i>
+                            <p class="mb-2 text-sm text-gray-400"><span class="font-semibold">Click to select</span> or drag and drop</p>
+                        </div>
+                        <input id="upload-file" type="file" class="hidden" accept="image/*" />
+                    </label>
+                </div>
+                <p id="file-name-display" class="text-xs text-indigo-400 mt-2 text-center"></p>
+            </div>
+
+            <button id="submit-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors flex justify-center items-center">
+                <span>Upload to Portfolio</span>
+                <i id="upload-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Alert Modal -->
+    <div id="alert-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
+        <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter text-center">
+            <div id="alert-icon" class="text-4xl mb-4 text-indigo-500"><i class="fas fa-info-circle"></i></div>
+            <h3 id="alert-title" class="text-xl font-bold mb-2 text-white">Notice</h3>
+            <p id="alert-message" class="text-gray-300 mb-6">Message goes here.</p>
+            <button id="close-alert-btn" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-6 rounded-md transition-colors">OK</button>
+        </div>
+    </div>
+
+    <!-- Confirm Delete Modal -->
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
+        <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter text-center shadow-2xl shadow-red-900/20">
+            <div class="text-4xl mb-4 text-red-500"><i class="fas fa-exclamation-triangle"></i></div>
+            <h3 class="text-xl font-bold mb-2 text-white">Delete Artwork?</h3>
+            <p class="text-gray-300 mb-6">Are you sure you want to remove this image? This cannot be undone.</p>
+            <div class="flex justify-center space-x-4">
+                <button id="cancel-delete-btn" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors w-full">Cancel</button>
+                <button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors w-full flex justify-center items-center">
+                    <span>Delete</span>
+                    <i id="delete-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="border-t border-gray-800 mt-auto py-6 text-center text-gray-500 text-sm relative z-10">
+        <p>&copy; 2026 MysteGUI Commissions.</p>
+    </footer>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-storage.js";
+
+        // Firebase Configuration & Initialization
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-portfolio-app';
+        let firebaseConfig;
+        
+        try {
+            firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {
+                apiKey: "mock-key",
+                authDomain: "mock.firebaseapp.com",
+                projectId: "mock-project",
+                storageBucket: "mock.appspot.com",
+                messagingSenderId: "12345",
+                appId: "1:1234:web:1234"
+            };
+        } catch (e) {
+            console.error("Config parsing error, using mock", e);
+            firebaseConfig = {};
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        let currentUser = null;
+        // Determine if the current viewer is the owner based on environment tokens
+        const isAdmin = typeof __initial_auth_token !== 'undefined' && !!__initial_auth_token;
+
+        let artworksData = []; // Start completely empty, no placeholders!
+
+        const state = {
+            currentTab: 'portfolio',
+            calculator: {
+                currency: 'usd',
+                render: 'rendered', 
+                shot: 'bust', 
+                addons: [],
+                commercial: false
+            }
+        };
+
+        const prices = {
+            usd: {
+                render: {
+                    lineart: { bust: 15, half: 25, thigh: 35, full: 50 },
+                    greyscale: { bust: 25, half: 35, thigh: 45, full: 65 },
+                    rendered: { bust: 35, half: 50, thigh: 65, full: 90 }
+                },
+                addons: { extra: 15, simpleBg: 10, complexBg: 20, rush: 15 }
+            },
+            php: {
+                render: {
+                    lineart: { bust: 50, half: 80, thigh: 100, full: 130 },
+                    greyscale: { bust: 70, half: 100, thigh: 120, full: 160 },
+                    rendered: { bust: 100, half: 150, thigh: 160, full: 200 }
+                },
+                addons: { extra: 80, simpleBg: 50, complexBg: 100, rush: 75 }
+            }
+        };
+
+        // DOM Elements
+        const mainContent = document.getElementById('main-content');
+        const navTabs = document.querySelectorAll('.nav-tab');
+        const mobileMenuBtn = document.getElementById('mobile-menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        
+        // Modal Elements
+        const uploadModal = document.getElementById('upload-modal');
+        const alertModal = document.getElementById('alert-modal');
+        const confirmModal = document.getElementById('confirm-modal');
+        let itemToDelete = null;
+
+        // Custom Alert Function
+        function showAlert(title, message, isError = false) {
+            document.getElementById('alert-title').innerText = title;
+            document.getElementById('alert-message').innerText = message;
+            const icon = document.getElementById('alert-icon');
+            icon.innerHTML = isError ? '<i class="fas fa-exclamation-triangle"></i>' : '<i class="fas fa-info-circle"></i>';
+            icon.className = `text-4xl mb-4 ${isError ? 'text-red-500' : 'text-indigo-500'}`;
+            alertModal.classList.remove('hidden');
+            alertModal.classList.add('flex');
+        }
+        document.getElementById('close-alert-btn').addEventListener('click', () => {
+            alertModal.classList.add('hidden');
+            alertModal.classList.remove('flex');
+        });
+
+        // Delete Confirmation Handlers
+        document.getElementById('cancel-delete-btn').addEventListener('click', () => {
+            confirmModal.classList.add('hidden');
+            confirmModal.classList.remove('flex');
+            itemToDelete = null;
+        });
+
+        document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
+            if (!itemToDelete) return;
+            
+            const btn = document.getElementById('confirm-delete-btn');
+            const spinner = document.getElementById('delete-spinner');
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                // If it's a mock or fallback ID, just delete it locally
+                if (String(itemToDelete).startsWith('mock-') || String(itemToDelete).startsWith('fallback-') || String(itemToDelete).startsWith('init-')) {
+                    artworksData = artworksData.filter(art => art.id !== itemToDelete);
+                } else {
+                    // Try to delete from real Firebase if connected
+                    if (firebaseConfig.apiKey !== "mock-key") {
+                         await deleteDoc(doc(db, 'artifacts', appId, 'public', 'data', 'artworks', itemToDelete));
+                    }
+                    // Remove locally to update UI instantly
+                    artworksData = artworksData.filter(art => art.id !== itemToDelete);
+                }
+                
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                if (state.currentTab === 'portfolio') renderApp();
+                showAlert("Deleted", "Artwork has been removed from the gallery.");
+            } catch (e) {
+                console.error("Delete error", e);
+                showAlert("Error", "Failed to delete artwork.", true);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                itemToDelete = null;
+            }
+        });
+
+        // Authentication Routine
+        async function authenticate() {
+            try {
+                if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                    await signInWithCustomToken(auth, __initial_auth_token);
+                } else {
+                    await signInAnonymously(auth);
+                }
+                currentUser = auth.currentUser;
+                console.log("Authenticated as:", currentUser.uid);
+                listenToArtworks();
+            } catch (error) {
+                console.error("Auth error:", error);
+                showAlert("Authentication Error", "Could not connect to services. Viewing in offline/demo mode.", true);
+                renderApp(); // Render with placeholders
+            }
+        }
+
+        function listenToArtworks() {
+            if (!currentUser) return;
+            const artworksRef = collection(db, 'artifacts', appId, 'public', 'data', 'artworks');
+            const q = query(artworksRef);
+            
+            onSnapshot(q, (snapshot) => {
+                const fetched = [];
+                snapshot.forEach((doc) => {
+                    fetched.push({ id: doc.id, ...doc.data() });
+                });
+                
+                if (fetched.length > 0) {
+                    // Use only fetched data
+                    artworksData = [...fetched.reverse()]; 
+                }
+                
+                if (state.currentTab === 'portfolio') {
+                    renderApp();
+                }
+            }, (error) => {
+                console.error("Firestore error:", error);
+                // Keep default placeholders on error
+                if (state.currentTab === 'portfolio') renderApp();
+            });
+        }
+
+        async function handleUpload() {
+            if (!isAdmin) {
+                showAlert("Unauthorized", "Only the portfolio owner can upload artworks.", true);
+                return;
+            }
+
+            const fileInput = document.getElementById('upload-file');
+            const titleInput = document.getElementById('upload-title');
+            const file = fileInput.files[0];
+            const title = titleInput.value.trim() || 'Untitled Artwork';
+            
+            if (!file) {
+                showAlert("Missing File", "Please select an image file to upload.", true);
+                return;
+            }
+            // Temporarily bypass strict auth check for demo purposes if not fully connected
+            if (!currentUser && Object.keys(firebaseConfig).length > 0 && firebaseConfig.apiKey !== "mock-key") {
+                showAlert("Not Authenticated", "You must be connected to upload.", true);
+                return;
+            }
+
+            const btn = document.getElementById('submit-upload-btn');
+            const spinner = document.getElementById('upload-spinner');
+            btn.disabled = true;
+            spinner.classList.remove('hidden');
+
+            try {
+                let downloadURL = "";
+                let orientation = "portrait";
+
+                // Check if we are using the mock config or real config
+                if (firebaseConfig.apiKey === "mock-key" || !firebaseConfig.apiKey) {
+                    // MOCK UPLOAD LOGIC
+                    console.log("Simulating upload (mock mode)...");
+                    await new Promise(r => setTimeout(r, 1500)); // Fake network delay
+                    
+                    // Create a local blob URL for preview
+                    downloadURL = URL.createObjectURL(file);
+                    
+                    const img = new Image();
+                    img.onload = () => {
+                        orientation = img.width > img.height ? 'landscape' : 'portrait';
+                        
+                        // Add directly to local state
+                        const newArt = {
+                            title: title,
+                            url: downloadURL,
+                            orientation: orientation,
+                            timestamp: Date.now(),
+                            id: "mock-" + Date.now()
+                        };
+                        
+                        artworksData.unshift(newArt);
+                        
+                        closeUploadModal();
+                        showAlert("Success!", "Artwork uploaded successfully (Demo Mode).");
+                        if(state.currentTab === 'portfolio') renderApp();
+                    };
+                    img.src = downloadURL;
+                    
+                } else {
+                    // REAL FIREBASE UPLOAD LOGIC
+                    try {
+                        const storageRef = ref(storage, `artifacts/${appId}/public/images/${Date.now()}_${file.name}`);
+                        const snapshot = await uploadBytes(storageRef, file);
+                        downloadURL = await getDownloadURL(snapshot.ref);
+
+                        const img = new Image();
+                        img.onload = async () => {
+                            orientation = img.width > img.height ? 'landscape' : 'portrait';
+                            
+                            const artworksRef = collection(db, 'artifacts', appId, 'public', 'data', 'artworks');
+                            await addDoc(artworksRef, {
+                                title: title,
+                                url: downloadURL,
+                                orientation: orientation,
+                                timestamp: Date.now(),
+                                uploaderId: currentUser ? currentUser.uid : 'anonymous'
+                            });
+
+                            closeUploadModal();
+                            showAlert("Success!", "Artwork uploaded successfully.");
+                        };
+                        img.src = URL.createObjectURL(file);
+                    } catch (fbError) {
+                        if (fbError.code === 'storage/unauthorized') {
+                            console.warn("Notice: Storage permission denied by security rules. Falling back to local preview upload.");
+                        } else {
+                            console.warn("Firebase upload issue:", fbError.message);
+                        }
+                        
+                        // Fallback if real Firebase throws unauthorized error (e.g. strict rules)
+                        downloadURL = URL.createObjectURL(file);
+                        const img = new Image();
+                        img.onload = () => {
+                            orientation = img.width > img.height ? 'landscape' : 'portrait';
+                            artworksData.unshift({
+                                title: title,
+                                url: downloadURL,
+                                orientation: orientation,
+                                timestamp: Date.now(),
+                                id: "fallback-" + Date.now()
+                            });
+                            closeUploadModal();
+                            showAlert("Local Success", "Artwork uploaded locally (Firebase rules blocked remote upload).");
+                            if(state.currentTab === 'portfolio') renderApp();
+                        };
+                        img.src = downloadURL;
+                    }
+                }
+                
+            } catch (error) {
+                console.error("Upload process error:", error);
+                showAlert("Upload Failed", "An unexpected error occurred during upload.", true);
+            } finally {
+                btn.disabled = false;
+                spinner.classList.add('hidden');
+                fileInput.value = '';
+                titleInput.value = '';
+                document.getElementById('file-name-display').innerText = '';
+            }
+        }
+
+        function getPortfolioHTML() {
+            let gridItems = '';
+            
+            // Show a friendly message if the gallery is empty
+            if (artworksData.length === 0) {
+                gridItems = `
+                    <div class="py-16 text-center text-gray-400 w-full flex flex-col items-center justify-center">
+                        <i class="fas fa-images text-6xl mb-4 opacity-40"></i>
+                        <p class="text-xl font-medium text-gray-300">Your portfolio is currently empty.</p>
+                        ${isAdmin ? '<p class="text-sm mt-3 text-indigo-400 bg-indigo-900/30 px-4 py-2 rounded-lg border border-indigo-500/30">Click the "Upload Art" button above to add your first piece!</p>' : ''}
+                    </div>
+                `;
+            } else {
+                gridItems = artworksData.map(art => `
+                    <div class="gallery-item bg-gray-800 rounded-xl border border-gray-700 relative group">
+                        <img src="${art.url}" alt="${art.title}" onerror="this.src='https://placehold.co/600x800/1a1a2e/8b5cf6?text=Image+Error'" loading="lazy">
+                        <div class="gallery-overlay">
+                            <h4 class="text-white font-bold text-lg">${art.title}</h4>
+                        </div>
+                        ${isAdmin ? `<button data-id="${art.id}" class="delete-art-btn absolute top-3 right-3 bg-red-600/90 hover:bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 transition-all duration-300 transform -translate-y-2 shadow-lg hover:scale-110"><i class="fas fa-trash-alt text-sm pointer-events-none"></i></button>` : ''}
+                    </div>
+                `).join('');
+            }
+
+            // Only generate the upload buttons if the user is the owner (isAdmin)
+            const desktopUploadBtn = isAdmin ? `
+                <button id="open-upload-btn" class="hidden md:flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-indigo-900/50">
+                    <i class="fas fa-plus"></i> <span>Upload Art</span>
+                </button>
+            ` : '';
+
+            const mobileUploadBtn = isAdmin ? `
+                <button id="open-upload-btn-mobile" class="md:hidden w-full flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg mb-8 transition-colors shadow-lg">
+                    <i class="fas fa-plus"></i> <span>Upload New Artwork</span>
+                </button>
+            ` : '';
+
+            return `
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h1 class="text-4xl font-extrabold text-white mb-2">Featured Works</h1>
+                        <p class="text-gray-400 max-w-2xl">A collection of dynamic character concepts, world-building illustrations, and polished artworks.</p>
+                    </div>
+                    ${desktopUploadBtn}
+                </div>
+                
+                <!-- Mobile upload button -->
+                ${mobileUploadBtn}
+
+                <div class="${artworksData.length === 0 ? 'flex justify-center w-full' : 'gallery-grid'}">
+                    ${gridItems}
+                </div>
+            `;
+        }
+
+        function getCommissionsHTML() {
+            const curr = state.calculator.currency;
+            const sym = curr === 'usd' ? '$' : '₱';
+            const addPrices = prices[curr].addons;
+
+            return `
+                <div class="max-w-6xl mx-auto">
+                    <h1 class="text-4xl font-extrabold text-white mb-4">Commissions & Info</h1>
+                    <p class="text-gray-400 mb-10">Thanks for your interest! Read through everything below before reaching out. Use the calculator to estimate your price.</p>
+                    
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+                        
+                        <!-- Info Panel -->
+                        <div class="lg:col-span-7 space-y-6">
+                            
+                            <!-- TOS & Rules -->
+                            <div class="glass-panel rounded-xl p-6">
+                                <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-scroll text-indigo-400 mr-2"></i>Terms of Service & Rules</h3>
+                                <div class="space-y-4 text-sm text-gray-300">
+                                    <p><span class="text-green-400 font-bold">✓ DO'S:</span> Characters, OCs, fanart, posters, thumbnails, icons, manga/comics, memes, animatics, and NSFW content. All types welcome.</p>
+                                    <p><span class="text-red-400 font-bold">✗ DON'TS:</span> Do not redistribute, resell, or claim my art as your own. Highly detailed complex backgrounds may be declined (simple/landscape is fine).</p>
+                                    <ul class="list-disc list-inside space-y-1 ml-2">
+                                        <li>All commissions are drawn in Ibis Paint.</li>
+                                        <li>Minor changes (small tweaks, color fixes) are free.</li>
+                                        <li>Major changes mid-process (pose, angle, composition) are subject to a ₱20 / $10 revision fee.</li>
+                                        <li>Commissioned art is for personal use only. Commercial use requires 2× the base price (disclose upfront).</li>
+                                        <li>I retain the right to post finished work to my portfolio and socials unless requested otherwise.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <!-- Process & Turnaround -->
+                            <div class="glass-panel rounded-xl p-6">
+                                <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-clock text-indigo-400 mr-2"></i>Turnaround & Process</h3>
+                                <div class="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
+                                    <div class="bg-gray-800 p-2 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 1</span> Sketch</div>
+                                    <div class="bg-gray-800 p-2 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 2</span> Lineart</div>
+                                    <div class="bg-gray-800 p-2 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 3</span> Rendering</div>
+                                </div>
+                                <p class="text-sm text-gray-400 mb-4">Simpler commissions (lineart only, bust up) may finish earlier. Rush orders (48hr) available for +₱75 / +$15.</p>
+                                <h4 class="text-white font-semibold mb-2">How to Order:</h4>
+                                <ol class="list-decimal list-inside space-y-2 text-sm text-gray-300 ml-2">
+                                    <li>Contact me via Discord or Twitter DM with details.</li>
+                                    <li>Send references (character sheets, palettes, poses, vibes).</li>
+                                    <li>Wait for confirmation & final price.</li>
+                                    <li>Pay downpayment (50%) or full. Work begins after payment.</li>
+                                    <li>Receive WIPs at each stage. Final file delivered as PNG + IPV file via Google Drive.</li>
+                                </ol>
+                            </div>
+
+                            <!-- Payment Info -->
+                            <div class="glass-panel rounded-xl p-6 bg-gradient-to-br from-indigo-900/20 to-transparent">
+                                <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700/50 pb-2"><i class="fas fa-wallet text-indigo-400 mr-2"></i>Payment Options</h3>
+                                <div class="flex flex-wrap gap-4 mb-4">
+                                    <div class="bg-gray-800/80 px-4 py-2 rounded-lg border border-gray-700 flex-1 min-w-[150px]">
+                                        <span class="block text-xs text-gray-400 uppercase">Local (PHP)</span>
+                                        <span class="font-semibold text-white">GCash / GoTyme</span>
+                                    </div>
+                                    <div class="bg-gray-800/80 px-4 py-2 rounded-lg border border-gray-700 flex-1 min-w-[150px]">
+                                        <span class="block text-xs text-gray-400 uppercase">International (USD)</span>
+                                        <span class="font-semibold text-white">PayPal</span>
+                                    </div>
+                                </div>
+                                <p class="text-sm text-gray-400"><i class="fas fa-exclamation-circle text-indigo-400 mr-1"></i> Payment details will be sent after your commission is accepted. Do not send payment before receiving confirmation.</p>
+                            </div>
+                        </div>
+
+                        <!-- Calculator Panel -->
+                        <div class="lg:col-span-5 glass-panel rounded-xl p-6 relative overflow-hidden h-fit lg:sticky lg:top-24">
+                            <div class="absolute top-0 right-0 w-32 h-32 bg-indigo-600 rounded-full blur-3xl opacity-10 -mr-10 -mt-10"></div>
+                            
+                            <div class="flex justify-between items-center mb-6">
+                                <h2 class="text-2xl font-bold text-white flex items-center">
+                                    <i class="fas fa-calculator text-indigo-500 mr-3"></i> Calculator
+                                </h2>
+                                <!-- Currency Toggle -->
+                                <div class="flex bg-gray-800 rounded-lg p-1 border border-gray-700">
+                                    <button class="curr-toggle px-3 py-1 text-sm rounded-md font-medium transition-colors ${curr === 'usd' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="usd">USD $</button>
+                                    <button class="curr-toggle px-3 py-1 text-sm rounded-md font-medium transition-colors ${curr === 'php' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="php">PHP ₱</button>
+                                </div>
+                            </div>
+                            
+                            <!-- Render Type -->
+                            <div class="mb-5">
+                                <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">1. Render Type</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    ${createRadioStr('render', 'lineart', 'Lineart')}
+                                    ${createRadioStr('render', 'greyscale', 'Greyscale')}
+                                    ${createRadioStr('render', 'rendered', 'Rendered')}
+                                </div>
+                            </div>
+                            
+                            <!-- Shot Type -->
+                            <div class="mb-5">
+                                <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">2. Shot Type</label>
+                                <div class="grid grid-cols-2 gap-2">
+                                    ${createRadioStr('shot', 'bust', 'Bust Up')}
+                                    ${createRadioStr('shot', 'half', 'Half-Body')}
+                                    ${createRadioStr('shot', 'thigh', 'Thigh-up')}
+                                    ${createRadioStr('shot', 'full', 'Full-Body')}
+                                </div>
+                            </div>
+                            
+                            <!-- Add-ons -->
+                            <div class="mb-6">
+                                <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">3. Add-ons & Usage</label>
+                                <div class="space-y-2">
+                                    ${createCheckboxStr('extra', 'Extra Character', addPrices.extra, sym)}
+                                    ${createCheckboxStr('simpleBg', 'Simple Background', addPrices.simpleBg, sym)}
+                                    ${createCheckboxStr('complexBg', 'Complex Background', addPrices.complexBg, sym)}
+                                    ${createCheckboxStr('rush', 'Rush Order (48hr)', addPrices.rush, sym)}
+                                    
+                                    <label class="flex items-center cursor-pointer group mt-4 pt-3 border-t border-gray-700">
+                                        <div class="relative flex items-center justify-center">
+                                            <input type="checkbox" id="calc-commercial" class="peer sr-only" ${state.calculator.commercial ? 'checked' : ''}>
+                                            <div class="w-5 h-5 bg-gray-800 border border-gray-600 rounded peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors"></div>
+                                            <i class="fas fa-check absolute text-white text-xs opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                                        </div>
+                                        <div class="ml-3 text-gray-300 group-hover:text-white transition-colors flex-grow flex justify-between items-center">
+                                            <span class="font-semibold text-indigo-300">Commercial Use</span>
+                                            <span class="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-1 rounded">2× Base Price</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <!-- Total -->
+                            <div class="border-t border-gray-700 pt-5 mt-2 flex justify-between items-center bg-gray-900/50 -mx-6 -mb-6 p-6 rounded-b-xl">
+                                <div>
+                                    <span class="block text-gray-400 font-medium">Estimated Total</span>
+                                    <span class="text-xs text-gray-500">*Major revisions (+${sym}${curr==='usd'?'10':'20'}) not included</span>
+                                </div>
+                                <div class="text-4xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400" id="calc-total">
+                                    ${sym}0
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getSocialsHTML() {
+            const socials = [
+                { name: "YouTube", icon: "fab fa-youtube", color: "hover:bg-red-600 hover:border-red-600", url: "https://www.youtube.com/@MysteGUIofficial323", text: "@MysteGUIofficial323" },
+                { name: "Twitter / X", icon: "fab fa-twitter", color: "hover:bg-blue-400 hover:border-blue-400", url: "https://x.com/MysteGUICasual", text: "@MysteGUICasual" },
+                { name: "Instagram", icon: "fab fa-instagram", color: "hover:bg-pink-600 hover:border-pink-600", url: "https://www.instagram.com/mystegui_official/?hl=en", text: "@mystegui_official" },
+                { name: "Facebook", icon: "fab fa-facebook", color: "hover:bg-blue-600 hover:border-blue-600", url: "https://www.facebook.com/profile.php?id=61577494834616&sk=about", text: "MysteGUI" },
+                { name: "Discord Server", icon: "fab fa-discord", color: "hover:bg-indigo-500 hover:border-indigo-500", url: "https://discord.gg/79hgWqGukp", text: "Join the Community" },
+                { name: "Email", icon: "fas fa-envelope", color: "hover:bg-gray-500 hover:border-gray-500", url: "mailto:MysteGUIOfficial@gmail.com", text: "MysteGUIOfficial@gmail.com" }
+            ];
+
+            return `
+                <div class="max-w-4xl mx-auto text-center py-8">
+                    <h1 class="text-4xl font-extrabold text-white mb-4">Connect With Me</h1>
+                    <p class="text-gray-400 mb-10">Follow me on social media, join the Discord, or reach out via email for business inquiries!</p>
+                    
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        ${socials.map(s => `
+                            <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="glass-panel border border-transparent p-5 rounded-xl flex items-center space-x-4 text-gray-300 transition-all duration-300 hover:text-white ${s.color} hover:shadow-lg transform hover:-translate-y-1 group">
+                                <div class="w-12 h-12 flex items-center justify-center bg-gray-800 rounded-full text-2xl group-hover:bg-white/20 transition-colors">
+                                    <i class="${s.icon}"></i>
+                                </div>
+                                <div class="text-left overflow-hidden">
+                                    <span class="block font-bold text-lg truncate">${s.name}</span>
+                                    <span class="block text-sm opacity-80 truncate">${s.text}</span>
+                                </div>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `;
+        }
+
+        function createRadioStr(group, value, label) {
+            const isChecked = state.calculator[group] === value;
+            return `
+                <label class="cursor-pointer">
+                    <input type="radio" name="${group}" value="${value}" class="peer sr-only calc-input" ${isChecked ? 'checked' : ''}>
+                    <div class="text-center px-2 py-3 rounded-md bg-gray-800 border border-gray-700 text-sm text-gray-400 transition-all peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-500 peer-hover:border-gray-500 shadow-sm font-medium">
+                        ${label}
+                    </div>
+                </label>
+            `;
+        }
+
+        function createCheckboxStr(id, label, price, sym) {
+            const isChecked = state.calculator.addons.includes(id);
+            return `
+                <label class="flex items-center cursor-pointer group py-1">
+                    <div class="relative flex items-center justify-center">
+                        <input type="checkbox" name="addon" value="${id}" class="peer sr-only calc-input" ${isChecked ? 'checked' : ''}>
+                        <div class="w-5 h-5 bg-gray-800 border border-gray-600 rounded peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors"></div>
+                        <i class="fas fa-check absolute text-white text-xs opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
+                    </div>
+                    <div class="ml-3 text-gray-300 group-hover:text-white transition-colors flex-grow flex justify-between items-center">
+                        <span>${label}</span>
+                        <span class="text-indigo-400 text-sm">+${sym}${price}</span>
+                    </div>
+                </label>
+            `;
+        }
+
+        function calculateTotal() {
+            const curr = state.calculator.currency;
+            const render = state.calculator.render;
+            const shot = state.calculator.shot;
+            
+            // Base price calculation via lookup table
+            let basePrice = prices[curr].render[render][shot];
+            
+            // Commercial multiplier
+            if (state.calculator.commercial) {
+                basePrice *= 2;
+            }
+            
+            // Addons calculation
+            let addonTotal = 0;
+            state.calculator.addons.forEach(addonId => {
+                addonTotal += prices[curr].addons[addonId];
+            });
+            
+            const total = basePrice + addonTotal;
+            const sym = curr === 'usd' ? '$' : '₱';
+            
+            const totalEl = document.getElementById('calc-total');
+            if (totalEl) {
+                totalEl.innerText = `${sym}${total}`;
+                // Animate value change
+                totalEl.style.transform = 'scale(1.1)';
+                setTimeout(() => totalEl.style.transform = 'scale(1)', 150);
+            }
+        }
+
+        function bindCalculatorEvents() {
+            // Currency Toggles
+            document.querySelectorAll('.curr-toggle').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    state.calculator.currency = e.target.dataset.curr;
+                    renderApp(); // Re-render to update UI texts and symbols
+                });
+            });
+
+            // Radios and Checkboxes
+            document.querySelectorAll('.calc-input').forEach(input => {
+                input.addEventListener('change', (e) => {
+                    if (e.target.name === 'render') state.calculator.render = e.target.value;
+                    if (e.target.name === 'shot') state.calculator.shot = e.target.value;
+                    if (e.target.name === 'addon') {
+                        const val = e.target.value;
+                        if (e.target.checked) {
+                            if (!state.calculator.addons.includes(val)) state.calculator.addons.push(val);
+                        } else {
+                            state.calculator.addons = state.calculator.addons.filter(a => a !== val);
+                        }
+                    }
+                    calculateTotal();
+                });
+            });
+            
+            // Commercial toggle
+            const commToggle = document.getElementById('calc-commercial');
+            if(commToggle) {
+                commToggle.addEventListener('change', (e) => {
+                    state.calculator.commercial = e.target.checked;
+                    calculateTotal();
+                });
+            }
+            
+            calculateTotal(); // initial calc
+        }
+
+        function bindPortfolioEvents() {
+            document.querySelectorAll('.delete-art-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation(); // Prevents clicking the image behind it
+                    itemToDelete = e.currentTarget.dataset.id;
+                    confirmModal.classList.remove('hidden');
+                    confirmModal.classList.add('flex');
+                });
+            });
+        }
+
+        function renderApp() {
+            // Update active tab styling
+            navTabs.forEach(tab => {
+                if (tab.dataset.tab === state.currentTab) {
+                    tab.classList.remove('text-gray-300', 'hover:bg-gray-700');
+                    tab.classList.add('text-white', 'bg-gray-800');
+                } else {
+                    tab.classList.remove('text-white', 'bg-gray-800');
+                    tab.classList.add('text-gray-300', 'hover:bg-gray-700');
+                }
+            });
+
+            // Render Content
+            if (state.currentTab === 'portfolio') {
+                mainContent.innerHTML = getPortfolioHTML();
+                
+                // Bind Upload Buttons
+                const btn1 = document.getElementById('open-upload-btn');
+                const btn2 = document.getElementById('open-upload-btn-mobile');
+                if (btn1) btn1.addEventListener('click', openUploadModal);
+                if (btn2) btn2.addEventListener('click', openUploadModal);
+                
+                // Bind Delete Buttons
+                bindPortfolioEvents();
+
+            } else if (state.currentTab === 'commissions') {
+                mainContent.innerHTML = getCommissionsHTML();
+                bindCalculatorEvents();
+            } else if (state.currentTab === 'socials') {
+                mainContent.innerHTML = getSocialsHTML();
+            }
+        }
+
+        // Tab Navigation
+        navTabs.forEach(tab => {
+            tab.addEventListener('click', (e) => {
+                state.currentTab = e.target.dataset.tab;
+                renderApp();
+                mobileMenu.classList.add('hidden'); // Close mobile menu if open
+            });
+        });
+
+        // Mobile Menu Toggle
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+
+        // Modal Logic
+        function openUploadModal() {
+            uploadModal.classList.remove('hidden');
+            uploadModal.classList.add('flex');
+        }
+        function closeUploadModal() {
+            uploadModal.classList.add('hidden');
+            uploadModal.classList.remove('flex');
+        }
+        
+        document.getElementById('close-modal-btn').addEventListener('click', closeUploadModal);
+        document.getElementById('submit-upload-btn').addEventListener('click', handleUpload);
+        
+        // File input display name logic
+        document.getElementById('upload-file').addEventListener('change', (e) => {
+            const fileName = e.target.files[0] ? e.target.files[0].name : '';
+            document.getElementById('file-name-display').innerText = fileName;
+        });
+
+        // Init App
+        renderApp();
+        authenticate();
+
+    </script>
+</body>
+</html>
