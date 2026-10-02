@@ -330,12 +330,12 @@
     <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
         <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter text-center shadow-2xl shadow-red-900/20">
             <div class="text-4xl mb-4 text-red-500"><i class="fas fa-exclamation-triangle"></i></div>
-            <h3 class="text-xl font-bold mb-2 text-white">Delete Artwork?</h3>
-            <p class="text-gray-300 mb-6">Are you sure you want to remove this image? This cannot be undone.</p>
+            <h3 id="confirm-title" class="text-xl font-bold mb-2 text-white">Delete Artwork?</h3>
+            <p id="confirm-message" class="text-gray-300 mb-6">Are you sure you want to remove this image? This cannot be undone.</p>
             <div class="flex justify-center space-x-4">
                 <button id="cancel-delete-btn" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors w-full">Cancel</button>
                 <button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors w-full flex justify-center items-center">
-                    <span>Delete</span>
+                    <span id="confirm-action-label">Delete</span>
                     <i id="delete-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
                 </button>
             </div>
@@ -401,6 +401,7 @@
         const confirmModal = document.getElementById('confirm-modal');
         const loginModal = document.getElementById('login-modal');
         let itemToDelete = null;
+        let deleteMode = 'single';
 
         // Modals & Alerts
         function showAlert(title, message, isError = false) {
@@ -478,10 +479,11 @@
             confirmModal.classList.add('hidden');
             confirmModal.classList.remove('flex');
             itemToDelete = null;
+            deleteMode = 'single';
         });
 
         document.getElementById('confirm-delete-btn').addEventListener('click', async () => {
-            if (!itemToDelete) return;
+            if (deleteMode === 'single' && !itemToDelete) return;
             const btn = document.getElementById('confirm-delete-btn');
             const spinner = document.getElementById('delete-spinner');
             btn.disabled = true;
@@ -489,21 +491,26 @@
 
             try {
                 if (firebaseConfig.apiKey !== "PASTE_YOUR_API_KEY_HERE") {
-                    await deleteDoc(doc(db, 'artworks', itemToDelete));
+                    if (deleteMode === 'all') {
+                        await Promise.all(artworksData.map(art => deleteDoc(doc(db, 'artworks', art.id))));
+                    } else {
+                        await deleteDoc(doc(db, 'artworks', itemToDelete));
+                    }
                 } else {
-                    artworksData = artworksData.filter(a => a.id !== itemToDelete);
+                    artworksData = deleteMode === 'all' ? [] : artworksData.filter(a => a.id !== itemToDelete);
                 }
                 confirmModal.classList.add('hidden');
                 confirmModal.classList.remove('flex');
                 if(state.currentTab === 'portfolio') renderApp();
-                showAlert("Deleted", "Artwork has been removed from the gallery.");
+                showAlert(deleteMode === 'all' ? "Portfolio Cleared" : "Deleted", deleteMode === 'all' ? "All artwork has been removed from the gallery." : "Artwork has been removed from the gallery.");
             } catch (e) {
                 console.error("Delete error", e);
-                showAlert("Error", "Failed to delete artwork.", true);
+                showAlert("Error", deleteMode === 'all' ? "Failed to delete all artwork." : "Failed to delete artwork.", true);
             } finally {
                 btn.disabled = false;
                 spinner.classList.add('hidden');
                 itemToDelete = null;
+                deleteMode = 'single';
             }
         });
 
@@ -636,6 +643,16 @@
                     <i class="fas fa-plus"></i> <span>Add New Artwork</span>
                 </button>
             ` : '';
+            const deleteAllBtn = showControls && sortedArtworks.length ? `
+                <button id="delete-all-btn" class="hidden md:flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-colors shadow-lg">
+                    <i class="fas fa-trash-alt"></i> <span>Delete All</span>
+                </button>
+            ` : '';
+            const mobileDeleteAllBtn = showControls && sortedArtworks.length ? `
+                <button id="delete-all-btn-mobile" class="md:hidden w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-4 py-3 rounded-lg -mt-5 mb-8 transition-colors shadow-lg">
+                    <i class="fas fa-trash-alt"></i> <span>Delete All Artwork</span>
+                </button>
+            ` : '';
 
             return `
                 <div class="flex justify-between items-end mb-8 flex-wrap gap-4">
@@ -649,9 +666,11 @@
                             <option value="oldest" ${state.sortOrder === 'oldest' ? 'selected' : ''}>Oldest First</option>
                         </select>
                         ${desktopUploadBtn}
+                        ${deleteAllBtn}
                     </div>
                 </div>
                 ${mobileUploadBtn}
+                ${mobileDeleteAllBtn}
                 <div class="${sortedArtworks.length === 0 ? 'flex justify-center w-full' : 'gallery-grid'}">
                     ${gridItems}
                 </div>
@@ -892,14 +911,30 @@
             calculateTotal();
         }
 
+        function openDeleteConfirm(mode, artworkId = null) {
+            deleteMode = mode;
+            itemToDelete = artworkId;
+            const isAll = mode === 'all';
+            document.getElementById('confirm-title').innerText = isAll ? 'Delete All Artwork?' : 'Delete Artwork?';
+            document.getElementById('confirm-message').innerText = isAll
+                ? 'This will permanently remove every artwork in your portfolio. This cannot be undone.'
+                : 'Are you sure you want to remove this image? This cannot be undone.';
+            document.getElementById('confirm-action-label').innerText = isAll ? 'Delete All' : 'Delete';
+            confirmModal.classList.remove('hidden');
+            confirmModal.classList.add('flex');
+        }
+
         function bindPortfolioEvents() {
             document.querySelectorAll('.delete-art-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    itemToDelete = e.currentTarget.dataset.id;
-                    confirmModal.classList.remove('hidden');
-                    confirmModal.classList.add('flex');
+                    openDeleteConfirm('single', e.currentTarget.dataset.id);
                 });
+            });
+
+            ['delete-all-btn', 'delete-all-btn-mobile'].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) btn.addEventListener('click', () => openDeleteConfirm('all'));
             });
 
             const sortSelect = document.getElementById('sort-select');
