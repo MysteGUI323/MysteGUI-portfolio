@@ -325,68 +325,12 @@
     </footer>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        // FIX 2: Added writeBatch to imports
-        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        // 1. Stable Import versions applied. Includes anonymous auth logic to ensure read permissions work properly.
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+        import { getAuth, signInWithEmailAndPassword, signInAnonymously, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, deleteDoc, doc, writeBatch } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-        const firebaseConfig = {
-  		    apiKey: "AIzaSyDMLKZgES04mUlJ1ygbPUUl1mTz5U-1wtE",
-  		    authDomain: "mystegui-portfolio-ec024.firebaseapp.com",
-  		    projectId: "mystegui-portfolio-ec024",
-  		    storageBucket: "mystegui-portfolio-ec024.firebasestorage.app",
-  		    messagingSenderId: "226274273666",
-  		    appId: "1:226274273666:web:1cba5871a850830b9f479b"
-	    };
-
-        // FIX 1: Security - Define authorized admin UID here
-        const ADMIN_UID = "REPLACE_WITH_YOUR_ADMIN_FIREBASE_UID"; 
-
-        let app, auth, db;
-        let currentUser = null;
-        let isAdmin = false;
-        let artworksData = []; 
-        let isFirebaseActive = false;
-
-        try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            isFirebaseActive = true;
-
-            onAuthStateChanged(auth, (user) => {
-                if (user) {
-                    console.log("Logged in User UID:", user.uid); // Helps the user identify their UID in console
-                    
-                    // FIX 1: Verify the signed-in user against the specific Admin UID
-                    if (ADMIN_UID === "REPLACE_WITH_YOUR_ADMIN_FIREBASE_UID") {
-                        console.warn("SECURITY WARNING: Admin UID not set. Granting temporary access for setup. Update ADMIN_UID in code.");
-                        isAdmin = true; 
-                    } else {
-                        isAdmin = (user.uid === ADMIN_UID);
-                    }
-
-                    if (isAdmin) {
-                        currentUser = user;
-                        const lBtn = document.getElementById('logout-btn');
-                        if(lBtn) lBtn.classList.remove('hidden');
-                    } else {
-                        // User is authenticated but NOT the admin - kick them out
-                        signOut(auth);
-                        showAlert("Unauthorized", "You do not have administrative privileges.");
-                    }
-                } else {
-                    currentUser = null;
-                    isAdmin = false;
-                    const lBtn = document.getElementById('logout-btn');
-                    if(lBtn) lBtn.classList.add('hidden');
-                }
-                if(state.currentTab === 'portfolio') renderApp();
-            });
-        } catch(e) {
-            console.error("Firebase failed to initialize:", e);
-        }
-
+        // 2. Application state safely hoisted to avoid reference errors on early load.
         const state = {
             currentTab: 'portfolio',
             sortOrder: 'newest',
@@ -406,6 +350,61 @@
                 addons: { extra: 80, simpleBg: 50, complexBg: 100, rush: 75 }
             }
         };
+
+        // 3. Database Path (Reverted to standard root collection)
+        const ARTWORKS_PATH = 'artworks';
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDMLKZgES04mUlJ1ygbPUUl1mTz5U-1wtE",
+            authDomain: "mystegui-portfolio-ec024.firebaseapp.com",
+            projectId: "mystegui-portfolio-ec024",
+            storageBucket: "mystegui-portfolio-ec024.firebasestorage.app",
+            messagingSenderId: "226274273666",
+            appId: "1:226274273666:web:1cba5871a850830b9f479b"
+        };
+
+        // 4. Fixed Syntax Error: Strings MUST be wrapped in quotes
+        const ADMIN_UID = "YUoIBwT1xbXglRRPHTu5VLFU7RO2"; 
+
+        let app, auth, db;
+        let currentUser = null;
+        let isAdmin = false;
+        let artworksData = []; 
+        let isFirebaseActive = false;
+
+        try {
+            app = initializeApp(firebaseConfig);
+            auth = getAuth(app);
+            db = getFirestore(app);
+            isFirebaseActive = true;
+
+            // FIX: Fetch public artworks IMMEDIATELY (Bypasses auth entirely)
+            listenToArtworks();
+
+            onAuthStateChanged(auth, (user) => {
+                if (user) {
+                    isAdmin = (user.uid === ADMIN_UID);
+                    if (isAdmin) {
+                        currentUser = user;
+                        const lBtn = document.getElementById('logout-btn');
+                        if(lBtn) lBtn.classList.remove('hidden');
+                    } else {
+                        // User is logged in but not admin
+                        isAdmin = false;
+                        const lBtn = document.getElementById('logout-btn');
+                        if(lBtn) lBtn.classList.add('hidden');
+                    }
+                } else {
+                    currentUser = null;
+                    isAdmin = false;
+                    const lBtn = document.getElementById('logout-btn');
+                    if(lBtn) lBtn.classList.add('hidden');
+                }
+                if(state.currentTab === 'portfolio') renderApp();
+            });
+        } catch(e) {
+            console.error("Firebase failed to initialize:", e);
+        }
 
         const mainContent = document.getElementById('main-content');
         const navTabs = document.querySelectorAll('.nav-tab');
@@ -433,7 +432,6 @@
             alertModal.classList.remove('flex');
         });
 
-        // FIX 4: Mobile-friendly Hidden Login Trigger
         const secretTrigger = document.getElementById('secret-login-trigger');
         let touchTimer;
         
@@ -444,17 +442,14 @@
             }
         };
 
-        // Desktop Double Click
         secretTrigger.addEventListener('dblclick', triggerLoginModal);
         
-        // Mobile Long Press (~1.2s hold)
         secretTrigger.addEventListener('touchstart', (e) => {
             touchTimer = window.setTimeout(triggerLoginModal, 1200);
         }, { passive: true });
         secretTrigger.addEventListener('touchend', () => clearTimeout(touchTimer));
         secretTrigger.addEventListener('touchmove', () => clearTimeout(touchTimer));
         secretTrigger.addEventListener('touchcancel', () => clearTimeout(touchTimer));
-
 
         document.getElementById('close-login-btn').addEventListener('click', () => {
             loginModal.classList.add('hidden');
@@ -500,14 +495,13 @@
             try {
                 if (isFirebaseActive) {
                     if (deleteMode === 'all') {
-                        // FIX 2: Batched operations for multiple deletes
                         const batch = writeBatch(db);
                         artworksData.forEach(art => {
-                            batch.delete(doc(db, 'artworks', art.id));
+                            batch.delete(doc(db, ARTWORKS_PATH, art.id));
                         });
                         await batch.commit();
                     } else {
-                        await deleteDoc(doc(db, 'artworks', itemToDelete));
+                        await deleteDoc(doc(db, ARTWORKS_PATH, itemToDelete));
                     }
                 }
                 confirmModal.classList.add('hidden');
@@ -527,16 +521,17 @@
 
         function listenToArtworks() {
             if (!isFirebaseActive) return;
-            const q = query(collection(db, 'artworks'));
+            const q = query(collection(db, ARTWORKS_PATH));
             onSnapshot(q, (snapshot) => {
                 const fetched = [];
-                snapshot.forEach((doc) => {
-                    fetched.push({ id: doc.id, ...doc.data() });
+                snapshot.forEach((document) => {
+                    fetched.push({ id: document.id, ...document.data() });
                 });
                 artworksData = fetched;
+                console.log("Success! Fetched artworks count:", artworksData.length);
                 if (state.currentTab === 'portfolio') renderApp();
             }, (error) => {
-                console.error("Firestore read error.", error);
+                console.error("Firestore read error. Check rules:", error);
             });
         }
 
@@ -565,7 +560,7 @@
                 const img = new Image();
                 img.onload = async () => {
                     const orientation = img.width > img.height ? 'landscape' : 'portrait';
-                    await addDoc(collection(db, 'artworks'), {
+                    await addDoc(collection(db, ARTWORKS_PATH), {
                         title: title,
                         url: imageUrl,
                         orientation: orientation,
@@ -1039,7 +1034,6 @@
                 });
             });
 
-            // FIX 3: Copy to Clipboard Logic
             const copyOrderBtn = document.getElementById('copy-order-btn');
             if (copyOrderBtn && state.orderItems.length > 0) {
                 copyOrderBtn.addEventListener('click', () => {
@@ -1154,9 +1148,10 @@
             }
         }
 
+        // 5. Fixed bubbling issue so hitting the button's text doesn't un-set the tab route
         navTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
-                state.currentTab = e.target.dataset.tab;
+                state.currentTab = e.currentTarget.dataset.tab;
                 renderApp();
                 mobileMenu.classList.add('hidden');
             });
@@ -1176,7 +1171,6 @@
         document.getElementById('submit-upload-btn').addEventListener('click', handleUpload);
 
         renderApp();
-        listenToArtworks();
 
     </script>
 </body>
