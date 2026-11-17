@@ -138,15 +138,21 @@
             transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
             cursor: pointer;
             break-inside: avoid;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1.15rem;
             display: inline-block;
             width: 100%;
         }
+        @media (min-width: 640px) { .gallery-item { margin-bottom: 1.5rem; } }
 
-        .gallery-item:hover { 
-            transform: translate(-2px, -6px) rotate(-0.35deg); 
-            box-shadow: 8px 9px 0 rgba(6, 7, 18, 0.62); 
-            border-color: rgba(196, 181, 253, 0.6);
+        @media (hover: hover) {
+            .gallery-item:hover { 
+                transform: translate(-2px, -6px) rotate(-0.35deg); 
+                box-shadow: 8px 9px 0 rgba(6, 7, 18, 0.62); 
+                border-color: rgba(196, 181, 253, 0.6);
+            }
+            .gallery-item:hover img { transform: scale(1.05); }
+            .gallery-item:hover .gallery-overlay { transform: translateY(0); }
+            .gallery-item:hover .delete-art-btn { opacity: 1; transform: translateY(0); }
         }
 
         .gallery-item img {
@@ -155,7 +161,6 @@
             display: block;
             transition: transform 0.5s ease;
         }
-        .gallery-item:hover img { transform: scale(1.05); }
 
         .gallery-overlay {
             position: absolute;
@@ -167,14 +172,23 @@
             transform: translateY(100%);
             transition: transform 0.3s ease;
         }
-        .gallery-item:hover .gallery-overlay { transform: translateY(0); }
 
         .delete-art-btn { z-index: 10; }
-        .gallery-item:hover .delete-art-btn { opacity: 1; transform: translateY(0); }
+
+        @media (hover: none) {
+            .gallery-overlay {
+                transform: translateY(0);
+                padding: 2.25rem 1rem 0.9rem;
+            }
+            .delete-art-btn {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
         /* 5. Inputs, Buttons & UI Details */
-        button, a { -webkit-tap-highlight-color: transparent; }
-        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
+        button, a { -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid var(--glow); outline-offset: 3px; }
         
         input, select, textarea { transition: border-color 180ms ease, box-shadow 180ms ease, background 180ms ease; }
         input:focus, select:focus, textarea:focus { border-color: var(--violet) !important; box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.16); }
@@ -194,7 +208,7 @@
         .bg-blob {
             position: fixed; filter: blur(90px); opacity: 0.4;
             animation: float 20s infinite ease-in-out alternate; z-index: -1;
-            border-radius: 50%; pointer-events: none;
+            border-radius: 50%; pointer-events: none; will-change: transform;
         }
         .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #3730a3; }
         .blob-2 { bottom: -10%; right: -10%; width: 60vw; height: 60vw; background: #1e1b4b; animation-delay: -7s; }
@@ -215,8 +229,11 @@
         footer { border-color: rgba(196, 181, 253, 0.1) !important; background: linear-gradient(to top, rgba(7, 8, 17, 0.55), transparent); }
 
         @media (max-width: 767px) {
-            nav img { width: 3rem !important; height: 3rem !important; }
-            nav .tracking-tighter { font-size: 1.45rem !important; }
+            nav img { width: 2.85rem !important; height: 2.85rem !important; }
+            nav .tracking-tighter { font-size: 1.4rem !important; }
+            main { padding-top: 2rem !important; padding-bottom: 3rem !important; }
+            .bg-blob { filter: blur(65px); opacity: 0.3; }
+            input, select, textarea { font-size: 16px; }
         }
         @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; } }
     </style>
@@ -243,18 +260,18 @@
                         <button data-tab="socials" class="nav-tab px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700">Socials</button>
                     </div>
                 </div>
-                <div class="-mr-2 flex md:hidden">
-                    <button type="button" id="mobile-menu-btn" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none">
-                        <i class="fas fa-bars text-xl"></i>
+                <div class="-mr-1 flex md:hidden">
+                    <button type="button" id="mobile-menu-btn" aria-label="Toggle navigation menu" aria-expanded="false" class="inline-flex items-center justify-center min-w-[44px] min-h-[44px] p-2 rounded-md text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none">
+                        <i id="mobile-menu-icon" class="fas fa-bars text-xl"></i>
                     </button>
                 </div>
             </div>
         </div>
-        <div class="md:hidden hidden bg-gray-900 border-b border-gray-800" id="mobile-menu">
-            <div class="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-                <button data-tab="portfolio" class="nav-tab mobile block px-3 py-2 text-white bg-gray-800 w-full text-left">Portfolio</button>
-                <button data-tab="commissions" class="nav-tab mobile block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 w-full text-left">Commissions</button>
-                <button data-tab="socials" class="nav-tab mobile block px-3 py-2 text-gray-300 hover:text-white hover:bg-gray-700 w-full text-left">Socials</button>
+        <div class="md:hidden hidden bg-gray-900/95 backdrop-blur-md border-b border-gray-800" id="mobile-menu">
+            <div class="px-3 pt-2 pb-3 space-y-1.5">
+                <button data-tab="portfolio" class="nav-tab mobile block px-4 py-3 text-white bg-gray-800 w-full text-left">Portfolio</button>
+                <button data-tab="commissions" class="nav-tab mobile block px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 w-full text-left">Commissions</button>
+                <button data-tab="socials" class="nav-tab mobile block px-4 py-3 text-gray-300 hover:text-white hover:bg-gray-700 w-full text-left">Socials</button>
             </div>
         </div>
     </nav>
@@ -264,25 +281,25 @@
     </main>
 
     <!-- Upload Modal -->
-    <div id="upload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
-        <div class="glass-panel w-full max-w-md rounded-xl p-6 modal-enter relative shadow-2xl shadow-indigo-900/20">
-            <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+    <div id="upload-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+        <div class="glass-panel w-full max-w-md max-h-[90vh] overflow-y-auto rounded-xl p-5 sm:p-6 modal-enter relative shadow-2xl shadow-indigo-900/20">
+            <button type="button" id="close-modal-btn" aria-label="Close upload modal" class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/70">
                 <i class="fas fa-times text-xl"></i>
             </button>
-            <h3 class="text-xl font-bold mb-4 text-white">Add New Artwork</h3>
+            <h3 class="text-xl font-bold mb-4 text-white pr-8">Add New Artwork</h3>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-400 mb-1">Title</label>
-                <input type="text" id="upload-title" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Cyberpunk Samurai">
+                <input type="text" id="upload-title" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Cyberpunk Samurai">
             </div>
             
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-400 mb-1">Direct Image URL</label>
-                <input type="url" id="upload-url" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., https://...">
+                <input type="url" id="upload-url" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., https://...">
                 <p class="text-xs text-gray-500 mt-2"><i class="fas fa-info-circle"></i> Paste a direct link to your image (Discord, Imgur, etc.)</p>
             </div>
 
-            <button id="submit-upload-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors flex justify-center items-center mt-6">
+            <button id="submit-upload-btn" class="w-full min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-md transition-colors flex justify-center items-center mt-6">
                 <span>Add to Portfolio</span>
                 <i id="upload-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
             </button>
@@ -290,47 +307,58 @@
     </div>
 
     <!-- Admin Login Modal (Secret) -->
-    <div id="login-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
-        <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter relative shadow-2xl shadow-indigo-900/20">
-            <button id="close-login-btn" class="absolute top-4 right-4 text-gray-400 hover:text-white">
+    <div id="login-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+        <div class="glass-panel w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-xl p-5 sm:p-6 modal-enter relative shadow-2xl shadow-indigo-900/20">
+            <button type="button" id="close-login-btn" aria-label="Close login modal" class="absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-lg text-gray-400 hover:text-white hover:bg-gray-800/70">
                 <i class="fas fa-times text-xl"></i>
             </button>
-            <h3 class="text-xl font-bold mb-4 text-white">Artist Login</h3>
+            <h3 class="text-xl font-bold mb-2 text-white pr-8">Artist Login</h3>
             <p class="text-xs text-gray-400 mb-4">Log in to manage your portfolio.</p>
             <div class="mb-4">
                 <label class="block text-sm font-medium text-gray-400 mb-1">Email</label>
-                <input type="email" id="login-email" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500">
+                <input type="email" id="login-email" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500">
             </div>
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-400 mb-1">Password</label>
-                <input type="password" id="login-password" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500">
+                <input type="password" id="login-password" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500">
             </div>
-            <button id="submit-login-btn" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-md transition-colors">
+            <button id="submit-login-btn" class="w-full min-h-[44px] bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-md transition-colors">
                 Log In
             </button>
             <p id="login-error" class="text-red-400 text-xs mt-3 hidden"></p>
         </div>
     </div>
 
+    <!-- Artwork Lightbox Modal -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/90 p-3 sm:p-6">
+        <div class="relative max-w-5xl w-full max-h-[92vh] flex flex-col items-center modal-enter">
+            <button type="button" id="close-lightbox-btn" aria-label="Close artwork preview" class="self-end mb-2 w-11 h-11 flex items-center justify-center rounded-full bg-gray-900/90 border border-gray-700 text-gray-200 hover:text-white hover:bg-gray-800 transition-colors">
+                <i class="fas fa-times text-lg"></i>
+            </button>
+            <img id="lightbox-img" src="" alt="" class="max-h-[76vh] w-auto max-w-full object-contain rounded-xl border-2 border-indigo-400/40 shadow-2xl">
+            <h3 id="lightbox-title" class="mt-3 text-lg sm:text-xl font-bold text-white text-center px-4"></h3>
+        </div>
+    </div>
+
     <!-- Custom Alert Modal -->
-    <div id="alert-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
-        <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter text-center">
+    <div id="alert-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+        <div class="glass-panel w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-xl p-5 sm:p-6 modal-enter text-center">
             <div id="alert-icon" class="text-4xl mb-4 text-indigo-500"><i class="fas fa-info-circle"></i></div>
             <h3 id="alert-title" class="text-xl font-bold mb-2 text-white">Notice</h3>
             <p id="alert-message" class="text-gray-300 mb-6">Message goes here.</p>
-            <button id="close-alert-btn" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-6 rounded-md transition-colors">OK</button>
+            <button id="close-alert-btn" class="min-h-[44px] bg-gray-700 hover:bg-gray-600 text-white py-2 px-6 rounded-md transition-colors">OK</button>
         </div>
     </div>
 
     <!-- Confirm Delete Modal -->
-    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black bg-opacity-75 p-4">
-        <div class="glass-panel w-full max-w-sm rounded-xl p-6 modal-enter text-center shadow-2xl shadow-red-900/20">
+    <div id="confirm-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 p-4">
+        <div class="glass-panel w-full max-w-sm max-h-[90vh] overflow-y-auto rounded-xl p-5 sm:p-6 modal-enter text-center shadow-2xl shadow-red-900/20">
             <div class="text-4xl mb-4 text-red-500"><i class="fas fa-exclamation-triangle"></i></div>
             <h3 id="confirm-title" class="text-xl font-bold mb-2 text-white">Delete Artwork?</h3>
             <p id="confirm-message" class="text-gray-300 mb-6">Are you sure you want to remove this image? This cannot be undone.</p>
             <div class="flex justify-center space-x-4">
-                <button id="cancel-delete-btn" class="bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors w-full">Cancel</button>
-                <button id="confirm-delete-btn" class="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors w-full flex justify-center items-center">
+                <button id="cancel-delete-btn" class="min-h-[44px] bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded-md transition-colors w-full">Cancel</button>
+                <button id="confirm-delete-btn" class="min-h-[44px] bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors w-full flex justify-center items-center">
                     <span id="confirm-action-label">Delete</span>
                     <i id="delete-spinner" class="fas fa-spinner fa-spin ml-2 hidden"></i>
                 </button>
@@ -631,45 +659,45 @@
                 `;
             } else {
                 gridItems = sortedArtworks.map(art => `
-                    <div class="gallery-item group">
-                        <img src="${art.url}" alt="${art.title}" loading="lazy">
+                    <div class="gallery-item group" data-url="${escapeHTML(art.url)}" data-title="${escapeHTML(art.title || 'Untitled Artwork')}">
+                        <img src="${escapeHTML(art.url)}" alt="${escapeHTML(art.title || 'Artwork')}" loading="lazy">
                         <div class="gallery-overlay">
-                            <h4 class="text-white font-bold text-lg">${art.title}</h4>
+                            <h4 class="text-white font-bold text-base sm:text-lg">${escapeHTML(art.title || 'Untitled Artwork')}</h4>
                         </div>
-                        ${showControls ? `<button data-id="${art.id}" class="delete-art-btn absolute top-3 right-3 bg-red-600/90 hover:bg-red-500 text-white w-9 h-9 rounded-full flex items-center justify-center opacity-0 transition-all duration-300 transform -translate-y-2 shadow-lg hover:scale-110"><i class="fas fa-trash-alt text-sm pointer-events-none"></i></button>` : ''}
+                        ${showControls ? `<button type="button" data-id="${escapeHTML(art.id)}" aria-label="Delete artwork" class="delete-art-btn absolute top-3 right-3 bg-red-600/90 hover:bg-red-500 text-white w-10 h-10 rounded-full flex items-center justify-center opacity-0 transition-all duration-300 transform -translate-y-2 shadow-lg hover:scale-110"><i class="fas fa-trash-alt text-sm pointer-events-none"></i></button>` : ''}
                     </div>
                 `).join('');
             }
 
             const desktopUploadBtn = showControls ? `
-                <button id="open-upload-btn" class="hidden md:flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg transition-colors shadow-lg shadow-indigo-900/50">
+                <button id="open-upload-btn" class="hidden md:flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2.5 rounded-lg transition-colors shadow-lg shadow-indigo-900/50">
                     <i class="fas fa-plus"></i> <span>Add Art</span>
                 </button>
             ` : '';
             const mobileUploadBtn = showControls ? `
-                <button id="open-upload-btn-mobile" class="md:hidden w-full flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg mb-8 transition-colors shadow-lg">
+                <button id="open-upload-btn-mobile" class="md:hidden w-full min-h-[44px] flex items-center justify-center space-x-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-3 rounded-lg mb-4 transition-colors shadow-lg">
                     <i class="fas fa-plus"></i> <span>Add New Artwork</span>
                 </button>
             ` : '';
             const deleteAllBtn = showControls && sortedArtworks.length ? `
-                <button id="delete-all-btn" class="hidden md:flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-lg transition-colors shadow-lg">
+                <button id="delete-all-btn" class="hidden md:flex items-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2.5 rounded-lg transition-colors shadow-lg">
                     <i class="fas fa-trash-alt"></i> <span>Delete All</span>
                 </button>
             ` : '';
             const mobileDeleteAllBtn = showControls && sortedArtworks.length ? `
-                <button id="delete-all-btn-mobile" class="md:hidden w-full flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-4 py-3 rounded-lg -mt-5 mb-8 transition-colors shadow-lg">
+                <button id="delete-all-btn-mobile" class="md:hidden w-full min-h-[44px] flex items-center justify-center space-x-2 bg-red-600 hover:bg-red-500 text-white px-4 py-3 rounded-lg mb-6 transition-colors shadow-lg">
                     <i class="fas fa-trash-alt"></i> <span>Delete All Artwork</span>
                 </button>
             ` : '';
 
             return `
-                <div class="flex justify-between items-end mb-8 flex-wrap gap-4">
+                <div class="flex justify-between items-start sm:items-end mb-6 sm:mb-8 flex-wrap gap-4">
                     <div>
-                        <h1 class="text-4xl font-extrabold text-white mb-2">Featured Works</h1>
-                        <p class="text-gray-400 max-w-2xl">A collection of dynamic character concepts, world-building illustrations, and polished artworks.</p>
+                        <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-2">Featured Works</h1>
+                        <p class="text-sm sm:text-base text-gray-400 max-w-2xl">A collection of dynamic character concepts, world-building illustrations, and polished artworks.</p>
                     </div>
-                    <div class="flex items-center space-x-3 w-full md:w-auto">
-                        <select id="sort-select" class="bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block p-2 outline-none cursor-pointer transition-colors hover:bg-gray-700">
+                    <div class="flex items-center space-x-3 w-full sm:w-auto">
+                        <select id="sort-select" class="w-full sm:w-auto min-h-[44px] sm:min-h-0 bg-gray-800 border border-gray-700 text-gray-300 text-sm rounded-lg focus:ring-indigo-500 focus:border-indigo-500 block px-3 py-2 outline-none cursor-pointer transition-colors hover:bg-gray-700">
                             <option value="newest" ${state.sortOrder === 'newest' ? 'selected' : ''}>Newest First</option>
                             <option value="oldest" ${state.sortOrder === 'oldest' ? 'selected' : ''}>Oldest First</option>
                         </select>
@@ -732,9 +760,9 @@
                             <div class="font-semibold text-white text-sm truncate">#${idx+1} - ${renderLabel} ${shotLabel}</div>
                             ${featuresStr}
                         </div>
-                        <div class="flex items-center space-x-3 flex-shrink-0">
+                        <div class="flex items-center space-x-2 sm:space-x-3 flex-shrink-0">
                             <span class="text-indigo-400 font-bold">${sym}${itemPrice}</span>
-                            <button class="delete-item-btn text-gray-500 hover:text-red-400 transition-colors w-7 h-7 flex items-center justify-center rounded-md hover:bg-gray-700" data-index="${idx}" title="Remove Item">
+                            <button type="button" class="delete-item-btn text-gray-400 hover:text-red-400 transition-colors w-9 h-9 flex items-center justify-center rounded-md hover:bg-gray-700" data-index="${idx}" aria-label="Remove item" title="Remove Item">
                                 <i class="fas fa-times"></i>
                             </button>
                         </div>
@@ -748,7 +776,7 @@
             return `
                 <label class="cursor-pointer">
                     <input type="radio" name="${group}" value="${value}" class="peer sr-only calc-input" ${isChecked ? 'checked' : ''}>
-                    <div class="text-center px-2 py-3 rounded-md bg-gray-800 border border-gray-700 text-sm text-gray-400 transition-all peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-500 peer-hover:border-gray-500 shadow-sm font-medium">
+                    <div class="min-h-[44px] flex items-center justify-center text-center px-2 py-2.5 rounded-md bg-gray-800 border border-gray-700 text-sm text-gray-400 transition-all peer-checked:bg-indigo-600 peer-checked:text-white peer-checked:border-indigo-500 peer-hover:border-gray-500 shadow-sm font-medium">
                         ${label}
                     </div>
                 </label>
@@ -758,15 +786,15 @@
         function createCheckboxStr(id, label, price, sym) {
             const isChecked = state.calculator.addons.includes(id);
             return `
-                <label class="flex items-center cursor-pointer group py-1">
-                    <div class="relative flex items-center justify-center">
+                <label class="flex items-center cursor-pointer group min-h-[42px] py-1">
+                    <div class="relative flex items-center justify-center flex-shrink-0">
                         <input type="checkbox" name="addon" value="${id}" class="peer sr-only calc-input" ${isChecked ? 'checked' : ''}>
                         <div class="w-5 h-5 bg-gray-800 border border-gray-600 rounded peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors"></div>
                         <i class="fas fa-check absolute text-white text-xs opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
                     </div>
-                    <div class="ml-3 text-gray-300 group-hover:text-white transition-colors flex-grow flex justify-between items-center">
-                        <span>${label}</span>
-                        <span class="text-indigo-400 text-sm">+${sym}${price}</span>
+                    <div class="ml-3 text-gray-300 group-hover:text-white transition-colors flex-grow flex justify-between items-center gap-2">
+                        <span class="text-sm sm:text-base">${label}</span>
+                        <span class="text-indigo-400 text-sm whitespace-nowrap">+${sym}${price}</span>
                     </div>
                 </label>
             `;
@@ -779,18 +807,23 @@
 
             return `
                 <div class="max-w-6xl mx-auto">
-                    <h1 class="text-4xl font-extrabold text-white mb-4">Commissions & Info</h1>
-                    <p class="text-gray-400 mb-10">Thanks for your interest! Read through everything below before reaching out. Build your order and send a request!</p>
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-3 sm:mb-4">Commissions & Info</h1>
+                    <p class="text-sm sm:text-base text-gray-400 mb-5 lg:mb-10">Thanks for your interest! Read through everything below before reaching out. Build your order and send a request!</p>
+                    <button type="button" id="jump-to-builder-btn" class="lg:hidden w-full min-h-[44px] mb-6 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2.5 px-4 rounded-lg flex items-center justify-center gap-2 transition-colors">
+                        <i class="fas fa-calculator"></i>
+                        <span>Jump to Order Builder</span>
+                        <i class="fas fa-arrow-down text-xs"></i>
+                    </button>
                     
-                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
-                        <div class="lg:col-span-7 space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10">
+                        <div class="lg:col-span-7 space-y-5 sm:space-y-6">
                             
-                            <div class="glass-panel rounded-xl p-6">
-                                <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-scroll text-indigo-400 mr-2"></i>Terms of Service & Rules</h3>
+                            <div class="glass-panel rounded-xl p-4 sm:p-6">
+                                <h3 class="text-lg sm:text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-scroll text-indigo-400 mr-2"></i>Terms of Service & Rules</h3>
                                 <div class="space-y-4 text-sm text-gray-300">
                                     <p><span class="text-green-400 font-bold">✓ DO'S:</span> Characters, OCs, fanart, posters, thumbnails, icons, manga/comics, memes, animatics, and NSFW content. All types welcome.</p>
                                     <p><span class="text-red-400 font-bold">✗ DON'TS:</span> Do not redistribute, resell, or claim my art as your own. Highly detailed complex backgrounds may be declined (simple/landscape is fine).</p>
-                                    <ul class="list-disc list-inside space-y-1 ml-2">
+                                    <ul class="list-disc list-inside space-y-1 ml-1 sm:ml-2">
                                         <li>All commissions are drawn in Ibis Paint.</li>
                                         <li>Minor changes (small tweaks, color fixes) are free.</li>
                                         <li>Major changes mid-process (pose, angle, composition) are subject to a ₱20 / $10 revision fee.</li>
@@ -800,16 +833,16 @@
                                 </div>
                             </div>
                             
-                            <div class="glass-panel rounded-xl p-6">
-                                <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-clock text-indigo-400 mr-2"></i>Turnaround & Process</h3>
-                                <div class="grid grid-cols-3 gap-2 mb-4 text-center text-sm">
-                                    <div class="bg-gray-800 p-2 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 1</span> Sketch</div>
-                                    <div class="bg-gray-800 p-2 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 2</span> Lineart</div>
-                                    <div class="bg-gray-800 p-2 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 3</span> Rendering</div>
+                            <div class="glass-panel rounded-xl p-4 sm:p-6">
+                                <h3 class="text-lg sm:text-xl font-bold text-white mb-4 border-b border-gray-700 pb-2"><i class="fas fa-clock text-indigo-400 mr-2"></i>Turnaround & Process</h3>
+                                <div class="grid grid-cols-3 gap-2 sm:gap-3 mb-4 text-center text-xs sm:text-sm">
+                                    <div class="bg-gray-800 p-2 sm:p-2.5 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 1</span> Sketch</div>
+                                    <div class="bg-gray-800 p-2 sm:p-2.5 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 2</span> Lineart</div>
+                                    <div class="bg-gray-800 p-2 sm:p-2.5 rounded border border-gray-700"><span class="block text-indigo-400 font-bold">Day 3</span> Rendering</div>
                                 </div>
                                 <p class="text-sm text-gray-400 mb-4">Simpler commissions (lineart only, bust up) may finish earlier. Rush orders (48hr) available for +₱75 / +$15.</p>
                                 <h4 class="text-white font-semibold mb-2">How to Order:</h4>
-                                <ol class="list-decimal list-inside space-y-2 text-sm text-gray-300 ml-2">
+                                <ol class="list-decimal list-inside space-y-2 text-sm text-gray-300 ml-1 sm:ml-2">
                                     <li>Add your desired illustrations to the order summary via the builder.</li>
                                     <li>Fill out your contact information, references, and notes.</li>
                                     <li>Click "Send Commission Request" to compile and open an email.</li>
@@ -818,14 +851,14 @@
                                 </ol>
                             </div>
 
-                            <div class="glass-panel rounded-xl p-6 bg-gradient-to-br from-indigo-900/20 to-transparent">
-                                <h3 class="text-xl font-bold text-white mb-4 border-b border-gray-700/50 pb-2"><i class="fas fa-wallet text-indigo-400 mr-2"></i>Payment Options</h3>
-                                <div class="flex flex-wrap gap-4 mb-4">
-                                    <div class="bg-gray-800/80 px-4 py-2 rounded-lg border border-gray-700 flex-1 min-w-[150px]">
+                            <div class="glass-panel rounded-xl p-4 sm:p-6 bg-gradient-to-br from-indigo-900/20 to-transparent">
+                                <h3 class="text-lg sm:text-xl font-bold text-white mb-4 border-b border-gray-700/50 pb-2"><i class="fas fa-wallet text-indigo-400 mr-2"></i>Payment Options</h3>
+                                <div class="flex flex-wrap gap-3 sm:gap-4 mb-4">
+                                    <div class="bg-gray-800/80 px-4 py-2.5 rounded-lg border border-gray-700 flex-1 min-w-[140px]">
                                         <span class="block text-xs text-gray-400 uppercase">Local (PHP)</span>
                                         <span class="font-semibold text-white">GCash / GoTyme</span>
                                     </div>
-                                    <div class="bg-gray-800/80 px-4 py-2 rounded-lg border border-gray-700 flex-1 min-w-[150px]">
+                                    <div class="bg-gray-800/80 px-4 py-2.5 rounded-lg border border-gray-700 flex-1 min-w-[140px]">
                                         <span class="block text-xs text-gray-400 uppercase">International (USD)</span>
                                         <span class="font-semibold text-white">PayPal</span>
                                     </div>
@@ -834,18 +867,18 @@
                             </div>
                         </div>
 
-                        <div class="lg:col-span-5 flex flex-col gap-6">
+                        <div id="commission-builder" class="lg:col-span-5 flex flex-col gap-5 sm:gap-6 scroll-mt-20">
                             
                             <!-- ITEM CONFIGURATOR -->
-                            <div class="glass-panel rounded-xl p-6 relative overflow-hidden h-fit">
+                            <div class="glass-panel rounded-xl p-4 sm:p-6 relative overflow-hidden h-fit">
                                 <div class="pointer-events-none absolute top-0 right-0 w-32 h-32 bg-indigo-600 rounded-full blur-3xl opacity-10 -mr-10 -mt-10"></div>
                                 <div class="relative z-10 flex flex-wrap justify-between items-center gap-3 mb-6">
-                                    <h2 class="text-xl font-bold text-white flex items-center">
-                                        <i class="fas fa-paint-brush text-indigo-500 mr-3"></i> 1. Configure Item
+                                    <h2 class="text-lg sm:text-xl font-bold text-white flex items-center">
+                                        <i class="fas fa-paint-brush text-indigo-500 mr-2.5 sm:mr-3"></i> 1. Configure Item
                                     </h2>
                                     <div class="inline-flex items-center gap-1 bg-gray-800 rounded-lg p-1 border border-gray-700 flex-shrink-0">
-                                        <button type="button" class="curr-toggle whitespace-nowrap px-3 py-1.5 text-sm leading-none rounded-md font-medium transition-colors ${curr === 'usd' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="usd">USD $</button>
-                                        <button type="button" class="curr-toggle whitespace-nowrap px-3 py-1.5 text-sm leading-none rounded-md font-medium transition-colors ${curr === 'php' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="php">PHP ₱</button>
+                                        <button type="button" class="curr-toggle whitespace-nowrap min-h-[36px] px-3 py-1.5 text-sm leading-none rounded-md font-medium transition-colors ${curr === 'usd' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="usd">USD $</button>
+                                        <button type="button" class="curr-toggle whitespace-nowrap min-h-[36px] px-3 py-1.5 text-sm leading-none rounded-md font-medium transition-colors ${curr === 'php' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:text-white'}" data-curr="php">PHP ₱</button>
                                     </div>
                                 </div>
                                 
@@ -870,38 +903,38 @@
                                 
                                 <div class="mb-6">
                                     <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Add-ons & Usage</label>
-                                    <div class="space-y-2">
-                                        <div class="flex items-center justify-between py-1.5 gap-3">
-                                            <label for="calc-extra-chars" class="text-gray-300 flex-grow">
+                                    <div class="space-y-1.5">
+                                        <div class="flex items-center justify-between min-h-[44px] py-1.5 gap-3">
+                                            <label for="calc-extra-chars" class="text-gray-300 flex-grow text-sm sm:text-base">
                                                 <span>Extra Characters</span>
-                                                <span class="text-indigo-400 text-sm ml-1">(+${sym}${addPrices.extra} ea)</span>
+                                                <span class="text-indigo-400 text-sm ml-1 whitespace-nowrap">(+${sym}${addPrices.extra} ea)</span>
                                             </label>
-                                            <div class="flex items-center bg-gray-800 border border-gray-600 rounded-md overflow-hidden">
-                                                <button type="button" id="extra-chars-dec" class="px-2.5 py-1 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-bold" aria-label="Decrease extra characters">-</button>
-                                                <input type="number" id="calc-extra-chars" min="0" max="99" step="1" value="${state.calculator.extraCharacters}" class="w-12 bg-transparent text-center text-white text-sm py-1 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                                                <button type="button" id="extra-chars-inc" class="px-2.5 py-1 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-bold" aria-label="Increase extra characters">+</button>
+                                            <div class="flex items-center bg-gray-800 border border-gray-600 rounded-md overflow-hidden flex-shrink-0">
+                                                <button type="button" id="extra-chars-dec" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-bold" aria-label="Decrease extra characters">-</button>
+                                                <input type="number" id="calc-extra-chars" min="0" max="99" step="1" value="${state.calculator.extraCharacters}" class="w-12 h-10 sm:h-9 bg-transparent text-center text-white text-base sm:text-sm focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                                <button type="button" id="extra-chars-inc" class="w-10 h-10 sm:w-9 sm:h-9 flex items-center justify-center text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-bold" aria-label="Increase extra characters">+</button>
                                             </div>
                                         </div>
                                         ${createCheckboxStr('simpleBg', 'Simple Background', addPrices.simpleBg, sym)}
                                         ${createCheckboxStr('complexBg', 'Complex Background', addPrices.complexBg, sym)}
                                         ${createCheckboxStr('rush', 'Rush Order (48hr)', addPrices.rush, sym)}
                                         
-                                        <label class="flex items-center cursor-pointer group mt-4 pt-3 border-t border-gray-700">
-                                            <div class="relative flex items-center justify-center">
+                                        <label class="flex items-center cursor-pointer group mt-3 pt-3 min-h-[44px] border-t border-gray-700">
+                                            <div class="relative flex items-center justify-center flex-shrink-0">
                                                 <input type="checkbox" id="calc-commercial" class="peer sr-only" ${state.calculator.commercial ? 'checked' : ''}>
                                                 <div class="w-5 h-5 bg-gray-800 border border-gray-600 rounded peer-checked:bg-indigo-500 peer-checked:border-indigo-500 transition-colors"></div>
                                                 <i class="fas fa-check absolute text-white text-xs opacity-0 peer-checked:opacity-100 pointer-events-none transition-opacity"></i>
                                             </div>
-                                            <div class="ml-3 text-gray-300 group-hover:text-white transition-colors flex-grow flex justify-between items-center">
-                                                <span class="font-semibold text-indigo-300">Commercial Use</span>
-                                                <span class="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-1 rounded">2× Base Price</span>
+                                            <div class="ml-3 text-gray-300 group-hover:text-white transition-colors flex-grow flex justify-between items-center gap-2">
+                                                <span class="font-semibold text-indigo-300 text-sm sm:text-base">Commercial Use</span>
+                                                <span class="text-xs bg-indigo-900/50 text-indigo-300 px-2 py-1 rounded whitespace-nowrap">2× Base Price</span>
                                             </div>
                                         </label>
                                     </div>
                                 </div>
                                 
                                 <div class="border-t border-gray-700 pt-5 mt-4">
-                                    <button id="add-to-order-btn" class="w-full bg-gray-800 hover:bg-indigo-600 border border-gray-700 hover:border-indigo-500 text-white font-bold py-3 px-4 rounded-md transition-all flex justify-between items-center group shadow-lg">
+                                    <button type="button" id="add-to-order-btn" class="w-full min-h-[48px] bg-gray-800 hover:bg-indigo-600 border border-gray-700 hover:border-indigo-500 text-white font-bold py-3 px-4 rounded-md transition-all flex justify-between items-center group shadow-lg">
                                         <span class="flex items-center"><i class="fas fa-plus mr-2 text-indigo-400 group-hover:text-white transition-colors"></i> Add to Order</span>
                                         <span class="text-lg" id="calc-current-total">${sym}0</span>
                                     </button>
@@ -909,8 +942,8 @@
                             </div>
 
                             <!-- ORDER CART & CLIENT DETAILS -->
-                            <div class="glass-panel rounded-xl p-6 relative h-fit">
-                                <h3 class="text-xl font-bold text-white mb-4 flex items-center border-b border-gray-700/50 pb-3">
+                            <div class="glass-panel rounded-xl p-4 sm:p-6 relative h-fit">
+                                <h3 class="text-lg sm:text-xl font-bold text-white mb-4 flex items-center border-b border-gray-700/50 pb-3">
                                     <i class="fas fa-shopping-basket text-indigo-400 mr-3"></i> 2. Your Order
                                 </h3>
                                 
@@ -929,28 +962,28 @@
                                 <div class="space-y-4">
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-400 mb-1">Your Name / Alias</label>
-                                        <input type="text" id="order-name" value="${escapeHTML(state.orderForm.name)}" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Jane Doe">
+                                        <input type="text" id="order-name" value="${escapeHTML(state.orderForm.name)}" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Jane Doe">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-400 mb-1">Contact Method</label>
-                                        <input type="text" id="order-contact" value="${escapeHTML(state.orderForm.contact)}" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Discord: user#1234 or email">
+                                        <input type="text" id="order-contact" value="${escapeHTML(state.orderForm.contact)}" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="e.g., Discord: user#1234 or email">
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-400 mb-1">Character References</label>
-                                        <textarea id="order-refs" rows="2" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="Paste links to references (Google Drive, Imgur, etc.)">${escapeHTML(state.orderForm.refs)}</textarea>
+                                        <textarea id="order-refs" rows="2" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="Paste links to references (Google Drive, Imgur, etc.)">${escapeHTML(state.orderForm.refs)}</textarea>
                                     </div>
                                     <div>
                                         <label class="block text-xs font-semibold text-gray-400 mb-1">Extra Details / Notes</label>
-                                        <textarea id="order-notes" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2 px-3 text-white focus:outline-none focus:border-indigo-500" placeholder="Specify pose, mood, expression, or background details">${escapeHTML(state.orderForm.notes)}</textarea>
+                                        <textarea id="order-notes" rows="3" class="w-full bg-gray-800 border border-gray-700 rounded-md py-2.5 px-3 text-base sm:text-sm text-white focus:outline-none focus:border-indigo-500" placeholder="Specify pose, mood, expression, or background details">${escapeHTML(state.orderForm.notes)}</textarea>
                                     </div>
                                 </div>
                                 
                                 <!-- FIX 3: Copy to clipboard fallback for mailto truncation -->
                                 <div class="flex flex-col sm:flex-row gap-3 mt-6">
-                                    <button id="copy-order-btn" class="w-full sm:w-1/3 bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-md transition-colors flex justify-center items-center shadow-lg" ${state.orderItems.length === 0 ? 'disabled' : ''} title="Copy form text if email button fails">
+                                    <button type="button" id="copy-order-btn" class="w-full sm:w-1/3 min-h-[46px] bg-gray-700 hover:bg-gray-600 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-md transition-colors flex justify-center items-center shadow-lg" ${state.orderItems.length === 0 ? 'disabled' : ''} title="Copy form text if email button fails">
                                         <i class="fas fa-copy mr-2"></i> Copy
                                     </button>
-                                    <button id="submit-order-btn" class="w-full sm:w-2/3 bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-md transition-colors flex justify-center items-center shadow-lg" ${state.orderItems.length === 0 ? 'disabled' : ''}>
+                                    <button type="button" id="submit-order-btn" class="w-full sm:w-2/3 min-h-[46px] bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-md transition-colors flex justify-center items-center shadow-lg" ${state.orderItems.length === 0 ? 'disabled' : ''}>
                                         <i class="fas fa-paper-plane mr-2"></i> Send Request
                                     </button>
                                 </div>
@@ -1013,6 +1046,14 @@
         }
 
         function bindCalculatorEvents() {
+            const jumpBtn = document.getElementById('jump-to-builder-btn');
+            if (jumpBtn) {
+                jumpBtn.addEventListener('click', () => {
+                    const builder = document.getElementById('commission-builder');
+                    if (builder) builder.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+            }
+
             document.querySelectorAll('.curr-toggle').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     state.currency = e.currentTarget.dataset.curr;
@@ -1140,17 +1181,17 @@
             ];
 
             return `
-                <div class="max-w-4xl mx-auto text-center py-8">
-                    <h1 class="text-4xl font-extrabold text-white mb-4">Connect With Me</h1>
-                    <p class="text-gray-400 mb-10">Follow me on social media, join the Discord, or reach out via email for business inquiries!</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="max-w-4xl mx-auto text-center py-4 sm:py-8">
+                    <h1 class="text-3xl sm:text-4xl font-extrabold text-white mb-3 sm:mb-4">Connect With Me</h1>
+                    <p class="text-sm sm:text-base text-gray-400 mb-8 sm:mb-10">Follow me on social media, join the Discord, or reach out via email for business inquiries!</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                         ${socials.map(s => `
-                            <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="glass-panel border border-transparent p-5 rounded-xl flex items-center space-x-4 text-gray-300 transition-all duration-300 hover:text-white ${s.color} hover:shadow-lg transform hover:-translate-y-1 group">
-                                <div class="w-12 h-12 flex items-center justify-center bg-gray-800 rounded-full text-2xl group-hover:bg-white/20 transition-colors">
+                            <a href="${s.url}" target="_blank" rel="noopener noreferrer" class="glass-panel border border-transparent p-4 sm:p-5 rounded-xl flex items-center space-x-4 text-gray-300 transition-all duration-300 hover:text-white ${s.color} hover:shadow-lg transform hover:-translate-y-1 group">
+                                <div class="w-12 h-12 flex-shrink-0 flex items-center justify-center bg-gray-800 rounded-full text-2xl group-hover:bg-white/20 transition-colors">
                                     <i class="${s.icon}"></i>
                                 </div>
-                                <div class="text-left overflow-hidden">
-                                    <span class="block font-bold text-lg truncate">${s.name}</span>
+                                <div class="text-left min-w-0 flex-1 overflow-hidden">
+                                    <span class="block font-bold text-base sm:text-lg truncate">${s.name}</span>
                                     <span class="block text-sm opacity-80 truncate">${s.text}</span>
                                 </div>
                             </a>
@@ -1173,7 +1214,37 @@
             confirmModal.classList.add('flex');
         }
 
+        const lightboxModal = document.getElementById('lightbox-modal');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const lightboxTitle = document.getElementById('lightbox-title');
+
+        function openLightbox(url, title) {
+            if (!url) return;
+            lightboxImg.src = url;
+            lightboxImg.alt = title || 'Artwork';
+            lightboxTitle.innerText = title || 'Untitled Artwork';
+            lightboxModal.classList.remove('hidden');
+            lightboxModal.classList.add('flex');
+        }
+
+        function closeLightbox() {
+            lightboxModal.classList.add('hidden');
+            lightboxModal.classList.remove('flex');
+            lightboxImg.src = '';
+        }
+
+        document.getElementById('close-lightbox-btn').addEventListener('click', closeLightbox);
+        lightboxModal.addEventListener('click', (e) => {
+            if (e.target === lightboxModal) closeLightbox();
+        });
+
         function bindPortfolioEvents() {
+            document.querySelectorAll('.gallery-item').forEach(card => {
+                card.addEventListener('click', () => {
+                    openLightbox(card.dataset.url, card.dataset.title);
+                });
+            });
+
             document.querySelectorAll('.delete-art-btn').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -1233,6 +1304,16 @@
             }
         }
 
+        const mobileMenuIcon = document.getElementById('mobile-menu-icon');
+
+        function setMobileMenuOpen(isOpen) {
+            mobileMenu.classList.toggle('hidden', !isOpen);
+            mobileMenuBtn.setAttribute('aria-expanded', String(isOpen));
+            if (mobileMenuIcon) {
+                mobileMenuIcon.className = isOpen ? 'fas fa-times text-xl' : 'fas fa-bars text-xl';
+            }
+        }
+
         // 5. Fixed bubbling issue so hitting the button's text doesn't un-set the tab route
         navTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
@@ -1245,11 +1326,14 @@
 
                 state.currentTab = nextTab;
                 renderApp({ animateDirection });
-                mobileMenu.classList.add('hidden');
+                setMobileMenuOpen(false);
             });
         });
         
-        mobileMenuBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
+        mobileMenuBtn.addEventListener('click', () => {
+            const isCurrentlyOpen = !mobileMenu.classList.contains('hidden');
+            setMobileMenuOpen(!isCurrentlyOpen);
+        });
 
         function openUploadModal() {
             uploadModal.classList.remove('hidden');
@@ -1261,6 +1345,20 @@
         }
         document.getElementById('close-modal-btn').addEventListener('click', closeUploadModal);
         document.getElementById('submit-upload-btn').addEventListener('click', handleUpload);
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeLightbox();
+                closeUploadModal();
+                loginModal.classList.add('hidden');
+                loginModal.classList.remove('flex');
+                alertModal.classList.add('hidden');
+                alertModal.classList.remove('flex');
+                confirmModal.classList.add('hidden');
+                confirmModal.classList.remove('flex');
+                setMobileMenuOpen(false);
+            }
+        });
 
         renderApp();
 
