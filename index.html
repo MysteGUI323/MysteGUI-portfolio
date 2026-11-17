@@ -335,7 +335,7 @@
             currentTab: 'portfolio',
             sortOrder: 'newest',
             currency: 'usd',
-            calculator: { render: 'rendered', shot: 'bust', addons: [], commercial: false },
+            calculator: { render: 'rendered', shot: 'bust', extraCharacters: 0, addons: [], commercial: false },
             orderItems: [],
             orderForm: { name: '', contact: '', refs: '', notes: '' }
         };
@@ -676,7 +676,8 @@
         function getItemPrice(itemConfig, curr) {
             let basePrice = prices[curr].render[itemConfig.render][itemConfig.shot];
             if (itemConfig.commercial) basePrice *= 2;
-            let addonTotal = 0;
+            const extraCount = Math.max(0, parseInt(itemConfig.extraCharacters, 10) || 0);
+            let addonTotal = extraCount * prices[curr].addons.extra;
             itemConfig.addons.forEach(addonId => { addonTotal += prices[curr].addons[addonId]; });
             return basePrice + addonTotal;
         }
@@ -697,9 +698,11 @@
                 const renderLabel = item.render.charAt(0).toUpperCase() + item.render.slice(1);
                 const shotLabel = item.shot.charAt(0).toUpperCase() + item.shot.slice(1);
                 
-                const addonLabels = { extra: 'Extra Char', simpleBg: 'Simple BG', complexBg: 'Complex BG', rush: 'Rush' };
+                const addonLabels = { simpleBg: 'Simple BG', complexBg: 'Complex BG', rush: 'Rush' };
                 let features = [];
                 if (item.commercial) features.push('Commercial');
+                const extraCount = Math.max(0, parseInt(item.extraCharacters, 10) || 0);
+                if (extraCount > 0) features.push(`+${extraCount} Extra Char${extraCount > 1 ? 's' : ''}`);
                 item.addons.forEach(a => features.push(addonLabels[a]));
                 
                 const featuresStr = features.length > 0 ? `<div class="text-xs text-gray-400 mt-1 truncate" title="${features.join(', ')}">${features.join(', ')}</div>` : '';
@@ -849,7 +852,17 @@
                                 <div class="mb-6">
                                     <label class="block text-xs font-semibold text-gray-400 mb-2 uppercase tracking-wider">Add-ons & Usage</label>
                                     <div class="space-y-2">
-                                        ${createCheckboxStr('extra', 'Extra Character', addPrices.extra, sym)}
+                                        <div class="flex items-center justify-between py-1.5 gap-3">
+                                            <label for="calc-extra-chars" class="text-gray-300 flex-grow">
+                                                <span>Extra Characters</span>
+                                                <span class="text-indigo-400 text-sm ml-1">(+${sym}${addPrices.extra} ea)</span>
+                                            </label>
+                                            <div class="flex items-center bg-gray-800 border border-gray-600 rounded-md overflow-hidden">
+                                                <button type="button" id="extra-chars-dec" class="px-2.5 py-1 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-bold" aria-label="Decrease extra characters">-</button>
+                                                <input type="number" id="calc-extra-chars" min="0" max="99" step="1" value="${state.calculator.extraCharacters}" class="w-12 bg-transparent text-center text-white text-sm py-1 focus:outline-none [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                                <button type="button" id="extra-chars-inc" class="px-2.5 py-1 text-gray-300 hover:text-white hover:bg-gray-700 transition-colors font-bold" aria-label="Increase extra characters">+</button>
+                                            </div>
+                                        </div>
                                         ${createCheckboxStr('simpleBg', 'Simple Background', addPrices.simpleBg, sym)}
                                         ${createCheckboxStr('complexBg', 'Complex Background', addPrices.complexBg, sym)}
                                         ${createCheckboxStr('rush', 'Rush Order (48hr)', addPrices.rush, sym)}
@@ -956,10 +969,14 @@
                 grandTotal += itemPrice;
                 const renderLabel = item.render.charAt(0).toUpperCase() + item.render.slice(1);
                 const shotLabel = item.shot.charAt(0).toUpperCase() + item.shot.slice(1);
-                const addonLabels = { extra: 'Extra Character', simpleBg: 'Simple Background', complexBg: 'Complex Background', rush: 'Rush Order' };
-                const addonsFormatted = item.addons.length > 0 
-                    ? item.addons.map(a => addonLabels[a]).join(', ') 
-                    : 'None';
+                const addonLabels = { simpleBg: 'Simple Background', complexBg: 'Complex Background', rush: 'Rush Order' };
+                const extraCount = Math.max(0, parseInt(item.extraCharacters, 10) || 0);
+                const addonParts = [];
+                if (extraCount > 0) {
+                    addonParts.push(`Extra Character ×${extraCount}`);
+                }
+                item.addons.forEach(a => addonParts.push(addonLabels[a]));
+                const addonsFormatted = addonParts.length > 0 ? addonParts.join(', ') : 'None';
                 const commercialLabel = item.commercial ? 'Yes (2x Base Price)' : 'No';
 
                 orderSummary += `Item ${idx + 1}: ${renderLabel} ${shotLabel}\n`;
@@ -1009,6 +1026,43 @@
                 });
             });
             
+            const extraCharsInput = document.getElementById('calc-extra-chars');
+            const extraCharsDec = document.getElementById('extra-chars-dec');
+            const extraCharsInc = document.getElementById('extra-chars-inc');
+            if (extraCharsInput) {
+                const clampExtraChars = (val) => Math.max(0, Math.min(99, parseInt(val, 10) || 0));
+
+                extraCharsInput.addEventListener('input', (e) => {
+                    state.calculator.extraCharacters = e.target.value === '' ? 0 : clampExtraChars(e.target.value);
+                    updateConfigTotal();
+                });
+
+                extraCharsInput.addEventListener('change', (e) => {
+                    const clamped = clampExtraChars(e.target.value);
+                    state.calculator.extraCharacters = clamped;
+                    e.target.value = clamped;
+                    updateConfigTotal();
+                });
+
+                if (extraCharsDec) {
+                    extraCharsDec.addEventListener('click', () => {
+                        const next = Math.max(0, (parseInt(state.calculator.extraCharacters, 10) || 0) - 1);
+                        state.calculator.extraCharacters = next;
+                        extraCharsInput.value = next;
+                        updateConfigTotal();
+                    });
+                }
+
+                if (extraCharsInc) {
+                    extraCharsInc.addEventListener('click', () => {
+                        const next = Math.min(99, (parseInt(state.calculator.extraCharacters, 10) || 0) + 1);
+                        state.calculator.extraCharacters = next;
+                        extraCharsInput.value = next;
+                        updateConfigTotal();
+                    });
+                }
+            }
+
             const commToggle = document.getElementById('calc-commercial');
             if (commToggle) {
                 commToggle.addEventListener('change', (e) => {
@@ -1021,7 +1075,7 @@
             if (addBtn) {
                 addBtn.addEventListener('click', () => {
                     state.orderItems.push(JSON.parse(JSON.stringify(state.calculator)));
-                    state.calculator = { render: 'rendered', shot: 'bust', addons: [], commercial: false };
+                    state.calculator = { render: 'rendered', shot: 'bust', extraCharacters: 0, addons: [], commercial: false };
                     renderApp();
                 });
             }
