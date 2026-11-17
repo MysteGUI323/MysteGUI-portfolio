@@ -88,14 +88,33 @@
         
         .nav-tab.bg-gray-800 {
             background: #222c3d;
-            border-color: rgba(255, 255, 255, 0.025);
-            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.025);
+            border-color: rgba(139, 92, 246, 0.35);
+            box-shadow: 0 3px 0 rgba(103, 84, 244, 0.55), inset 0 0 0 1px rgba(255, 255, 255, 0.04);
         }
         
         .nav-tab:hover, .nav-tab.bg-gray-800:hover { 
             background: #333f58; 
             box-shadow: 3px 3px 0 rgba(6, 8, 18, 0.45); 
             transform: translateY(-1px);
+        }
+
+        .nav-tab:active {
+            transform: translateY(1px) scale(0.97);
+        }
+
+        @keyframes tabEnterRight {
+            0% { opacity: 0; transform: translate3d(20px, 6px, 0) scale(0.985); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        @keyframes tabEnterLeft {
+            0% { opacity: 0; transform: translate3d(-20px, 6px, 0) scale(0.985); }
+            100% { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+        }
+        .tab-enter-right {
+            animation: tabEnterRight 240ms cubic-bezier(0.22, 1.28, 0.36, 1) both;
+        }
+        .tab-enter-left {
+            animation: tabEnterLeft 240ms cubic-bezier(0.22, 1.28, 0.36, 1) both;
         }
 
         /* 4. Masonry Layout & Gallery Items */
@@ -1176,7 +1195,15 @@
             }
         }
 
-        function renderApp() {
+        const TAB_ORDER = ['portfolio', 'commissions', 'socials'];
+
+        function playTabAnimation(direction) {
+            mainContent.classList.remove('tab-enter-right', 'tab-enter-left');
+            void mainContent.offsetWidth;
+            mainContent.classList.add(direction === 'left' ? 'tab-enter-left' : 'tab-enter-right');
+        }
+
+        function renderApp(options = {}) {
             navTabs.forEach(tab => {
                 if (tab.dataset.tab === state.currentTab) {
                     tab.classList.remove('text-gray-300', 'hover:bg-gray-700');
@@ -1200,13 +1227,24 @@
             } else if (state.currentTab === 'socials') {
                 mainContent.innerHTML = getSocialsHTML();
             }
+
+            if (options.animateDirection) {
+                playTabAnimation(options.animateDirection);
+            }
         }
 
         // 5. Fixed bubbling issue so hitting the button's text doesn't un-set the tab route
         navTabs.forEach(tab => {
             tab.addEventListener('click', (e) => {
-                state.currentTab = e.currentTarget.dataset.tab;
-                renderApp();
+                const nextTab = e.currentTarget.dataset.tab;
+                const prevIndex = TAB_ORDER.indexOf(state.currentTab);
+                const nextIndex = TAB_ORDER.indexOf(nextTab);
+                const animateDirection = nextTab !== state.currentTab
+                    ? (nextIndex < prevIndex ? 'left' : 'right')
+                    : null;
+
+                state.currentTab = nextTab;
+                renderApp({ animateDirection });
                 mobileMenu.classList.add('hidden');
             });
         });
